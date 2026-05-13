@@ -403,10 +403,13 @@ function ConstellationStarsGroup({
       if (!m || !mat) continue;
       const sAdd = Math.min(SCALE_CAP_ADD, scaleAdd[i]);
       const eAdd = Math.min(EMISSIVE_CAP_ADD, emissiveAdd[i]);
-      const finalScale = starBaseScales[i] * foreshadowMul * (1 + sAdd);
+      // Per-star foreshadow multiplier (1 + add). Caps applied so foreshadow
+      // alone never exceeds the strategy's documented peak.
+      const fsMul = 1 + Math.min(0.8, foreshadowAdd[i]);
+      const finalScale = starBaseScales[i] * fsMul * (1 + sAdd);
       m.scale.setScalar(finalScale);
 
-      const intensity = foreshadowMul * (1 + eAdd);
+      const intensity = fsMul * (1 + eAdd);
       mat.color.setRGB(
         BASE_COLOR.r * intensity,
         BASE_COLOR.g * intensity,
