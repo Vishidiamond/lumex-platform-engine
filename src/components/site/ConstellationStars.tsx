@@ -2,7 +2,7 @@ import { useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { sceneState } from "@/lib/scene-state";
-import { TRANSITS, FORESHADOW, bezier } from "./camera-config";
+import { scrollStore } from "@/lib/scroll-store";
 import { type Constellation3D, CONSTELLATIONS } from "./constellations3d";
 import { ARRIVAL_CONFIGS } from "./constellation-connections";
 
