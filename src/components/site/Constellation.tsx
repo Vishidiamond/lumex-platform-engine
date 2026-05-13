@@ -164,14 +164,30 @@ interface ConstellationProps {
   className?: string;
   /** Whether the constellation should draw itself. */
   active?: boolean;
+  /** When true, skip the entrance reveal — render fully drawn instantly. */
+  instant?: boolean;
+  /** Indices of stars that should pulse softly. */
+  pulse?: number[];
+  /** Hide labels (used for ambient overhead variants). */
+  hideLabels?: boolean;
 }
 
 /**
  * SVG constellation. Stars fade in, then connecting lines draw with a
- * stroke-dashoffset reveal. Used inside arrival beats.
+ * stroke-dashoffset reveal. Optionally renders fully drawn instantly
+ * (for deep-dive overhead use) and pulses specific stars.
  */
-export function Constellation({ pattern, className, active = true }: ConstellationProps) {
+export function Constellation({
+  pattern,
+  className,
+  active = true,
+  instant = false,
+  pulse,
+  hideLabels = false,
+}: ConstellationProps) {
   const spec = SPECS[pattern];
+  const isOn = instant ? true : active;
+  const pulseSet = pulse ? new Set(pulse) : null;
 
   return (
     <svg
@@ -194,45 +210,69 @@ export function Constellation({ pattern, className, active = true }: Constellati
               strokeWidth={0.8}
               pathLength={1}
               strokeDasharray={1}
-              strokeDashoffset={active ? 0 : 1}
-              style={{
-                transition: `stroke-dashoffset 1.2s ease-out ${0.05 * i + 0.3}s, opacity 0.6s ease`,
-                opacity: active ? 1 : 0,
-              }}
+              strokeDashoffset={isOn ? 0 : 1}
+              style={
+                instant
+                  ? { opacity: 0.7 }
+                  : {
+                      transition: `stroke-dashoffset 1.2s ease-out ${0.05 * i + 0.3}s, opacity 0.6s ease`,
+                      opacity: isOn ? 1 : 0,
+                    }
+              }
             />
           );
         })}
-        {spec.stars.map((s, i) => (
-          <g key={i}>
-            <circle
-              cx={s.x}
-              cy={s.y}
-              r={s.r ?? 1.6}
-              fill="white"
-              style={{
-                transition: `opacity 0.6s ease ${0.02 * i}s, transform 0.6s ease`,
-                opacity: active ? 1 : 0,
-                transformOrigin: `${s.x}px ${s.y}px`,
-              }}
-            />
-            {s.label ? (
-              <text
-                x={s.x + 14}
-                y={s.y - 10}
-                fill="rgba(220, 232, 255, 0.85)"
-                style={{
-                  font: "500 13px 'JetBrains Mono', ui-monospace, monospace",
-                  letterSpacing: "0.12em",
-                  textTransform: "uppercase",
-                  transition: "opacity 0.8s ease 0.9s",
-                  opacity: active ? 1 : 0,
-                }}
-              >
-                {s.label}
-              </text>
-            ) : null}
-          </g>
-        ))}
+        {spec.stars.map((s, i) => {
+          const isPulsing = pulseSet?.has(i) ?? false;
+          const baseR = s.r ?? 1.6;
+          return (
+            <g key={i}>
+              {isPulsing ? (
+                <circle
+                  cx={s.x}
+                  cy={s.y}
+                  r={baseR}
+                  fill="rgba(180, 210, 255, 0.35)"
+                  style={{
+                    transformBox: "fill-box",
+                    transformOrigin: "center",
+                    animation: "lumex-star-pulse 2.4s ease-in-out infinite",
+                  }}
+                />
+              ) : null}
+              <circle
+                cx={s.x}
+                cy={s.y}
+                r={baseR}
+                fill="white"
+                style={
+                  instant
+                    ? { opacity: isPulsing ? 1 : 0.85 }
+                    : {
+                        transition: `opacity 0.6s ease ${0.02 * i}s`,
+                        opacity: isOn ? 1 : 0,
+                      }
+                }
+              />
+              {!hideLabels && s.label ? (
+                <text
+                  x={s.x + 14}
+                  y={s.y - 10}
+                  fill="rgba(220, 232, 255, 0.85)"
+                  style={{
+                    font: "500 13px 'JetBrains Mono', ui-monospace, monospace",
+                    letterSpacing: "0.12em",
+                    textTransform: "uppercase",
+                    transition: instant ? undefined : "opacity 0.8s ease 0.9s",
+                    opacity: isOn ? 1 : 0,
+                  }}
+                >
+                  {s.label}
+                </text>
+              ) : null}
+            </g>
+          );
+        })}
       </g>
     </svg>
   );
