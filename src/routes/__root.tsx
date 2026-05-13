@@ -11,6 +11,7 @@ import {
 import appCss from "../styles.css?url";
 import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Footer";
+import { LenisProvider } from "@/components/site/LenisProvider";
 
 function NotFoundComponent() {
   return (
@@ -126,6 +127,7 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
+      <LenisProvider />
       <div className="flex min-h-screen flex-col">
         <Header />
         <main className="flex-1">
