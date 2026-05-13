@@ -6,6 +6,12 @@ import { sceneState } from "@/lib/scene-state";
 import { CONSTELLATIONS, CONSTELLATION_BY_ID, type Constellation3D } from "./constellations3d";
 import { AllConstellationLines } from "./ConstellationLines";
 import {
+  ARRIVAL_SPRINGS,
+  arrivalLookAt,
+  makeSpringRuntime,
+  stepSpring,
+} from "./arrival-springs";
+import {
   AMBIENT_DRIFT,
   DENSE_TRANSIT,
   FORESHADOW,
@@ -366,6 +372,14 @@ function CameraRig({
   const prevCamPos = useRef(new THREE.Vector3());
   const prevTime = useRef(0);
 
+  // ── lookAt spring state machine ──
+  const springs = useRef(ARRIVAL_SPRINGS.map(makeSpringRuntime));
+  const prevProgress = useRef(0);
+  // Persistent post-spring offset that decays into scroll-driven lookAt so
+  // the handoff back to scroll-driven motion never snaps.
+  const handoffOffset = useRef(new THREE.Vector3());
+  const arrivalTmp = useRef(new THREE.Vector3());
+
   const persp = camera as THREE.PerspectiveCamera;
 
   useFrame(() => {
@@ -374,6 +388,8 @@ function CameraRig({
     prevTime.current = now;
 
     const p = scrollStore.get();
+    const pPrev = prevProgress.current;
+    prevProgress.current = p;
     const r = resolvePose(p, pose.current);
 
     let dx = 0;
@@ -385,7 +401,90 @@ function CameraRig({
     }
 
     driftedPos.current.set(r.position.x + dx, r.position.y + dy, r.position.z);
+
+    // Scroll-driven lookAt baseline (from keyframe interpolation).
     tmpLook.current.copy(r.target);
+
+    // Decay the handoff offset toward zero so scroll-driven lookAt resumes
+    // smoothly from wherever the spring left off.
+    if (handoffOffset.current.lengthSq() > 1e-6) {
+      const decay = Math.min(1, dt * 2.4); // ~420ms tail
+      handoffOffset.current.multiplyScalar(1 - decay);
+    }
+
+    // ── Per-arrival spring evaluation ──
+    for (const rt of springs.current) {
+      const spec = rt.spec;
+
+      // Re-arm when scrollProgress drops below trigger by hysteresis.
+      if (!rt.armed && p < spec.triggerProgress - spec.rearmHysteresis) {
+        rt.armed = true;
+      }
+
+      // Fire on forward crossing only.
+      const crossedForward =
+        rt.armed && pPrev < spec.triggerProgress && p >= spec.triggerProgress;
+
+      if (crossedForward && !reduceMotion) {
+        // Capture current lookAt (including any active offset) as spring start.
+        rt.pos.copy(tmpLook.current).add(handoffOffset.current);
+        rt.vel.set(0, 0, 0);
+        // Target = arrival lookAt + intentional overshoot.
+        arrivalLookAt(spec, arrivalTmp.current);
+        rt.target.set(
+          arrivalTmp.current.x + spec.overshoot[0],
+          arrivalTmp.current.y + spec.overshoot[1],
+          arrivalTmp.current.z + spec.overshoot[2],
+        );
+        rt.startedAt = performance.now();
+        rt.active = true;
+        rt.armed = false;
+        rt.peakOvershoot = 0;
+        rt.settleMs = null;
+      }
+
+      if (rt.active) {
+        const elapsed = performance.now() - (rt.startedAt ?? 0);
+        // Step the spring with sub-stepped fixed dt for stability.
+        const steps = Math.max(1, Math.ceil(dt / (1 / 120)));
+        const sub = dt / steps;
+        for (let s = 0; s < steps; s++) stepSpring(rt, sub);
+
+        // Diagnostics: track overshoot amplitude vs. arrival target (no overshoot offset).
+        arrivalLookAt(spec, arrivalTmp.current);
+        const dxA = rt.pos.x - arrivalTmp.current.x;
+        const dyA = rt.pos.y - arrivalTmp.current.y;
+        const dzA = rt.pos.z - arrivalTmp.current.z;
+        const dist = Math.sqrt(dxA * dxA + dyA * dyA + dzA * dzA);
+        if (dist > rt.peakOvershoot) rt.peakOvershoot = dist;
+        if (rt.settleMs === null && dist < 0.5 && elapsed > 60) {
+          rt.settleMs = elapsed;
+        }
+
+        if (elapsed >= spec.maxDurationMs) {
+          // Handoff: capture (spring lookAt − scroll-driven lookAt) so the
+          // remaining residual decays from the spring's resting frame back
+          // onto the keyframe path.
+          rt.finalLookAt.copy(rt.pos);
+          handoffOffset.current.copy(rt.pos).sub(r.target);
+          rt.active = false;
+        } else {
+          // Spring owns the lookAt this frame.
+          tmpLook.current.copy(rt.pos);
+        }
+      }
+    }
+
+    // Apply residual handoff offset to the (possibly already spring-driven) lookAt.
+    if (!springs.current.some((rt) => rt.active)) {
+      tmpLook.current.add(handoffOffset.current);
+    }
+
+    if (reduceMotion) {
+      // Snap to whichever arrival target the user is closest to within window.
+      // (Skip the spring entirely.)
+      tmpLook.current.copy(r.target);
+    }
 
     persp.position.copy(driftedPos.current);
     persp.up.set(0, 1, 0);
