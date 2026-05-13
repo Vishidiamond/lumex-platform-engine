@@ -86,7 +86,7 @@ function Index() {
         subhead="Atelier Amara. Fortunoff. The next acquisition. The engineering, technology, and capital backbone is shared."
         body={<BrandsRow />}
         closer="Owned IP. Owned rails. Owned brands."
-        secondaryCta={{ label: "Explore the brands", to: "/brands" }}
+        secondaryCta={{ label: "Explore the brands", to: "/house" }}
       />
       <Beat10 />
     </div>

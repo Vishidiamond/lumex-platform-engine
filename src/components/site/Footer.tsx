@@ -14,7 +14,7 @@ const COLUMNS = [
     links: [
       { to: "/diamonds", label: "Loose Diamonds" },
       { to: "/jewelry", label: "Jewelry" },
-      { to: "/brands", label: "Brands" },
+      { to: "/house", label: "Brands" },
       { to: "/technology", label: "AI & Technology" },
     ],
   },

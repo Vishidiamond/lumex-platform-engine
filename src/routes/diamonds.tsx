@@ -117,7 +117,7 @@ function DiamondsPage() {
 
       <PageCloser line="Precision is the product." />
 
-      <ContinueJourney to="/brands" label="Continue the journey →" />
+      <ContinueJourney to="/house" label="Continue the journey →" />
     </DeepDivePage>
   );
 }
