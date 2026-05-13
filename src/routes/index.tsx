@@ -67,6 +67,7 @@ function Index() {
           </div>
         }
         closer="The future of design is owned."
+        primaryCta={{ label: "Visit NSphere.ai", href: "https://nsphere.ai", external: true }}
         secondaryCta={{ label: "See the technology", to: "/technology" }}
       />
       <BeatTransit line="Precision is the product." />
