@@ -2,7 +2,14 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";
 import { scrollStore } from "@/lib/scroll-store";
-import { CONSTELLATIONS, v } from "./constellations3d";
+import { CONSTELLATIONS } from "./constellations3d";
+import {
+  AMBIENT_DRIFT,
+  KEYFRAMES,
+  PARALLAX,
+  makePose,
+  resolvePose,
+} from "./camera-config";
 
 /* ─────────────── Star tier generation ─────────────── */
 
@@ -18,9 +25,10 @@ interface TierSpec {
   rMax: number;
   size: number;
   opacity: number;
+  parallaxDamp: number;
 }
 
-function makeTierGeometry({ count, rMin, rMax }: TierSpec) {
+function makeTierGeometry(count: number, rMin: number, rMax: number) {
   const positions = new Float32Array(count * 3);
   const colors = new Float32Array(count * 3);
   for (let i = 0; i < count; i++) {
@@ -44,28 +52,50 @@ function makeTierGeometry({ count, rMin, rMax }: TierSpec) {
   return g;
 }
 
-function StarTier({ spec }: { spec: TierSpec }) {
-  const geom = useMemo(() => makeTierGeometry(spec), [spec]);
+interface TierHandle {
+  group: THREE.Group | null;
+  material: THREE.PointsMaterial | null;
+  baseSize: number;
+  damp: number;
+}
+
+function StarTier({ spec, handleRef }: { spec: TierSpec; handleRef: React.MutableRefObject<TierHandle> }) {
+  const groupRef = useRef<THREE.Group>(null);
+  const matRef = useRef<THREE.PointsMaterial>(null);
+  const geom = useMemo(() => makeTierGeometry(spec.count, spec.rMin, spec.rMax), [spec.count, spec.rMin, spec.rMax]);
+
+  useEffect(() => {
+    handleRef.current = {
+      group: groupRef.current,
+      material: matRef.current,
+      baseSize: spec.size,
+      damp: spec.parallaxDamp,
+    };
+  }, [handleRef, spec.size, spec.parallaxDamp]);
+
   return (
-    <points frustumCulled={false}>
-      <primitive object={geom} attach="geometry" />
-      <pointsMaterial
-        size={spec.size}
-        sizeAttenuation
-        vertexColors
-        transparent
-        opacity={spec.opacity}
-        depthWrite={false}
-        blending={THREE.AdditiveBlending}
-      />
-    </points>
+    <group ref={groupRef}>
+      <points frustumCulled={false}>
+        <primitive object={geom} attach="geometry" />
+        <pointsMaterial
+          ref={matRef}
+          size={spec.size}
+          sizeAttenuation
+          vertexColors
+          transparent
+          opacity={spec.opacity}
+          depthWrite={false}
+          blending={THREE.AdditiveBlending}
+        />
+      </points>
+    </group>
   );
 }
 
 /* ─────────────── Constellation bright stars ─────────────── */
 
 function ConstellationStars() {
-  const { positions, colors } = useMemo(() => {
+  const geom = useMemo(() => {
     const all: number[] = [];
     const cols: number[] = [];
     const c = new THREE.Color("#eaf1ff");
@@ -75,18 +105,11 @@ function ConstellationStars() {
         cols.push(c.r, c.g, c.b);
       });
     });
-    return {
-      positions: new Float32Array(all),
-      colors: new Float32Array(cols),
-    };
-  }, []);
-
-  const geom = useMemo(() => {
     const g = new THREE.BufferGeometry();
-    g.setAttribute("position", new THREE.BufferAttribute(positions, 3));
-    g.setAttribute("color", new THREE.BufferAttribute(colors, 3));
+    g.setAttribute("position", new THREE.BufferAttribute(new Float32Array(all), 3));
+    g.setAttribute("color", new THREE.BufferAttribute(new Float32Array(cols), 3));
     return g;
-  }, [positions, colors]);
+  }, []);
 
   return (
     <points frustumCulled={false}>
@@ -104,69 +127,160 @@ function ConstellationStars() {
   );
 }
 
-/* ─────────────── Camera rig (placeholder path; refined in Prompt C) ─────────────── */
+/* ─────────────── Cinematic Camera Rig ─────────────── */
 
-function CameraRig({ reduceMotion }: { reduceMotion: boolean }) {
-  const { camera } = useThree();
-  const target = useRef(new THREE.Vector3());
-  const tmp = useRef(new THREE.Vector3());
+function CameraRig({
+  reduceMotion,
+  tiers,
+}: {
+  reduceMotion: boolean;
+  tiers: { near: React.MutableRefObject<TierHandle>; mid: React.MutableRefObject<TierHandle>; far: React.MutableRefObject<TierHandle> };
+}) {
+  const { camera, clock } = useThree();
+  const pose = useRef(makePose());
+  const tmpLook = useRef(new THREE.Vector3());
+  const tmpPos = useRef(new THREE.Vector3());
+  const driftedPos = useRef(new THREE.Vector3());
 
-  // Keyframed camera path: 5 stops — opening, then each constellation arrival.
-  const stops = useMemo(() => {
-    const opening = {
-      pos: new THREE.Vector3(0, 0, 300),
-      look: new THREE.Vector3(0, 0, 0),
-    };
-    return [
-      opening,
-      ...CONSTELLATIONS.map((c) => ({
-        pos: v(c.center).add(new THREE.Vector3(0, 0, 180)),
-        look: v(c.center),
-      })),
-    ];
-  }, []);
+  const persp = camera as THREE.PerspectiveCamera;
 
   useFrame(() => {
     const p = scrollStore.get();
-    const seg = (stops.length - 1) * p;
-    const i = Math.min(stops.length - 2, Math.floor(seg));
-    const t = seg - i;
-    // smoothstep for nicer interpolation between stops (Prompt C will replace)
-    const ts = t * t * (3 - 2 * t);
-    const a = stops[i];
-    const b = stops[i + 1];
-    target.current.lerpVectors(a.pos, b.pos, ts);
-    tmp.current.lerpVectors(a.look, b.look, ts);
-    if (reduceMotion) {
-      camera.position.copy(target.current);
-    } else {
-      camera.position.lerp(target.current, 0.12);
+    const r = resolvePose(p, pose.current);
+
+    // ambient drift (skip under reduced motion)
+    let dx = 0;
+    let dy = 0;
+    if (!reduceMotion) {
+      const t = clock.getElapsedTime();
+      const w = (Math.PI * 2) / AMBIENT_DRIFT.periodSec;
+      dx = Math.sin(t * w) * AMBIENT_DRIFT.ampX;
+      dy = Math.cos(t * w * 0.85) * AMBIENT_DRIFT.ampY;
     }
-    camera.lookAt(tmp.current);
+
+    driftedPos.current.set(r.position.x + dx, r.position.y + dy, r.position.z);
+    tmpLook.current.copy(r.target);
+
+    // Hold camera position (no easing toward target — pose is already eased)
+    persp.position.copy(driftedPos.current);
+
+    // Smooth re-targeting: lookAt every frame, target itself is interpolated
+    persp.up.set(0, 1, 0);
+    persp.lookAt(tmpLook.current);
+
+    // Apply roll on Z after lookAt
+    if (Math.abs(r.rollDeg) > 1e-4 && !reduceMotion) {
+      persp.rotateZ((r.rollDeg * Math.PI) / 180);
+    }
+
+    // FOV
+    if (Math.abs(persp.fov - r.fov) > 1e-3) {
+      persp.fov = r.fov;
+      persp.updateProjectionMatrix();
+    }
+
+    // Parallax-dampened star tiers — far tier follows camera (sky dome feel)
+    for (const ref of [tiers.near, tiers.mid, tiers.far]) {
+      const h = ref.current;
+      if (!h.group) continue;
+      tmpPos.current.copy(driftedPos.current).multiplyScalar(h.damp);
+      h.group.position.copy(tmpPos.current);
+    }
+
+    // Near-tier size boost during transits — motion-blur suggestion
+    const nearMat = tiers.near.current.material;
+    const nearBase = tiers.near.current.baseSize;
+    if (nearMat) {
+      const target = nearBase * (1 + PARALLAX.nearTransitSizeBoost * r.transitness);
+      // small lerp so size changes feel organic
+      nearMat.size += (target - nearMat.size) * 0.18;
+    }
   });
+
+  // Set initial camera state once
+  useEffect(() => {
+    const r = resolvePose(0, pose.current);
+    persp.position.copy(r.position);
+    persp.lookAt(r.target);
+    persp.fov = r.fov;
+    persp.updateProjectionMatrix();
+  }, [persp]);
 
   return null;
 }
 
-/* ─────────────── Drifting starfield group ─────────────── */
+/* ─────────────── Sky scaffolding (visible only at full pullback, Beat 10) ─────────────── */
 
-function Starfield3D({ reduceMotion }: { reduceMotion: boolean }) {
-  const groupRef = useRef<THREE.Group>(null);
+function FullSkyScaffolding() {
+  const ref = useRef<THREE.LineSegments>(null);
+
+  const geom = useMemo(() => {
+    const pts: number[] = [];
+    const centers = CONSTELLATIONS.map((c) => c.center);
+    const pairs: [number, number][] = [
+      [0, 1], [1, 2], [2, 3], [3, 0], [0, 2], [1, 3],
+    ];
+    pairs.forEach(([a, b]) => {
+      pts.push(...centers[a], ...centers[b]);
+    });
+    const g = new THREE.BufferGeometry();
+    g.setAttribute("position", new THREE.BufferAttribute(new Float32Array(pts), 3));
+    return g;
+  }, []);
 
   useFrame(() => {
-    if (reduceMotion) return;
-    const g = groupRef.current;
-    if (!g) return;
-    g.rotation.y += 0.0002;
+    const p = scrollStore.get();
+    // fade in only on the final pullback segment (between Beat 9 → Beat 10)
+    const start = KEYFRAMES[KEYFRAMES.length - 2].progress;
+    const end = KEYFRAMES[KEYFRAMES.length - 1].progress;
+    const local = Math.min(1, Math.max(0, (p - start) / Math.max(1e-6, end - start)));
+    const o = local * local * 0.45; // ease-in, max 0.45 alpha
+    const mat = ref.current?.material as THREE.LineBasicMaterial | undefined;
+    if (mat && Math.abs(mat.opacity - o) > 1e-3) {
+      mat.opacity = o;
+      mat.visible = o > 0.001;
+    }
   });
 
   return (
-    <group ref={groupRef}>
-      <StarTier spec={{ count: 2000, rMin: 100, rMax: 300, size: 1.6, opacity: 0.95 }} />
-      <StarTier spec={{ count: 4000, rMin: 300, rMax: 700, size: 1.0, opacity: 0.7 }} />
-      <StarTier spec={{ count: 5000, rMin: 700, rMax: 1000, size: 0.6, opacity: 0.45 }} />
+    <lineSegments ref={ref}>
+      <primitive object={geom} attach="geometry" />
+      <lineBasicMaterial
+        color="#a9bbe0"
+        transparent
+        opacity={0}
+        depthWrite={false}
+        blending={THREE.AdditiveBlending}
+      />
+    </lineSegments>
+  );
+}
+
+/* ─────────────── Scene root ─────────────── */
+
+function Scene({ reduceMotion }: { reduceMotion: boolean }) {
+  const nearRef = useRef<TierHandle>({ group: null, material: null, baseSize: 1.6, damp: PARALLAX.near });
+  const midRef = useRef<TierHandle>({ group: null, material: null, baseSize: 1.0, damp: PARALLAX.mid });
+  const farRef = useRef<TierHandle>({ group: null, material: null, baseSize: 0.6, damp: PARALLAX.far });
+
+  return (
+    <>
+      <StarTier
+        handleRef={farRef}
+        spec={{ count: 5000, rMin: 700, rMax: 1000, size: 0.6, opacity: 0.45, parallaxDamp: PARALLAX.far }}
+      />
+      <StarTier
+        handleRef={midRef}
+        spec={{ count: 4000, rMin: 300, rMax: 700, size: 1.0, opacity: 0.7, parallaxDamp: PARALLAX.mid }}
+      />
+      <StarTier
+        handleRef={nearRef}
+        spec={{ count: 2000, rMin: 100, rMax: 300, size: 1.6, opacity: 0.95, parallaxDamp: PARALLAX.near }}
+      />
       <ConstellationStars />
-    </group>
+      <FullSkyScaffolding />
+      <CameraRig reduceMotion={reduceMotion} tiers={{ near: nearRef, mid: midRef, far: farRef }} />
+    </>
   );
 }
 
@@ -198,11 +312,10 @@ export function Starfield() {
         <Canvas
           dpr={[1, 2]}
           gl={{ antialias: true, alpha: true, powerPreference: "high-performance" }}
-          camera={{ fov: 60, near: 0.1, far: 2000, position: [0, 0, 300] }}
+          camera={{ fov: 60, near: 0.1, far: 2000, position: [0, 0, 0] }}
           frameloop="always"
         >
-          <Starfield3D reduceMotion={reduceMotion} />
-          <CameraRig reduceMotion={reduceMotion} />
+          <Scene reduceMotion={reduceMotion} />
         </Canvas>
       ) : null}
     </div>
