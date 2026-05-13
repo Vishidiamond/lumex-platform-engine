@@ -97,8 +97,8 @@ function TechnologyPage() {
       <section className="relative px-6 py-12 md:px-10 md:py-16">
         <div className="mx-auto max-w-6xl">
           <Contrast
-            not="Most companies will eventually add AI."
-            then="We were built around it."
+            not="Not AI added later —"
+            then="built around it from day one."
           />
           <Contrast
             not="We don't model the industry —"
