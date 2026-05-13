@@ -4,6 +4,7 @@ import * as THREE from "three";
 import { scrollStore } from "@/lib/scroll-store";
 import { sceneState } from "@/lib/scene-state";
 import { CONSTELLATIONS, CONSTELLATION_BY_ID, type Constellation3D } from "./constellations3d";
+import { AllConstellationLines } from "./ConstellationLines";
 import {
   AMBIENT_DRIFT,
   DENSE_TRANSIT,
@@ -511,6 +512,7 @@ function Scene({ reduceMotion }: { reduceMotion: boolean }) {
       <NearTierStreaks nearRef={nearRef} />
       <DenseTransitStars />
       <AllConstellations />
+      <AllConstellationLines reduceMotion={reduceMotion} />
       <FullSkyScaffolding />
       <CameraRig reduceMotion={reduceMotion} tiers={{ near: nearRef, mid: midRef, far: farRef }} />
     </>
