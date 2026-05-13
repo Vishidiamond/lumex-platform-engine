@@ -369,7 +369,7 @@ function CtaButton({ cta, variant }: { cta: Cta; variant: "solid" | "ghost" }) {
     );
   }
   return (
-    <Link to={cta.to!} className={cls}>
+    <Link to={cta.to! as "/platform"} className={cls}>
       {cta.label}
     </Link>
   );
