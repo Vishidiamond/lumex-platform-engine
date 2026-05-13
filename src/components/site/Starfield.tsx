@@ -26,17 +26,6 @@ import {
   resolvePose,
 } from "./camera-config";
 import {
-  AMBIENT_DRIFT,
-  DENSE_TRANSIT,
-  FORESHADOW,
-  KEYFRAMES,
-  PARALLAX,
-  STREAK,
-  TRANSITS,
-  bezier,
-  makePose,
-  resolvePose,
-} from "./camera-config";
 
 /* ─────────────── Star tier generation ─────────────── */
 
