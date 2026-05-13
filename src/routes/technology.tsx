@@ -70,7 +70,7 @@ function TechnologyPage() {
           <p>
             Models compete. Patents compound. Owning the foundational IP for
             how the category designs is structurally different from owning a
-            model that anyone can replace.
+            model that anyone can copy.
           </p>
         </div>
       </Beat>
@@ -97,8 +97,8 @@ function TechnologyPage() {
       <section className="relative px-6 py-12 md:px-10 md:py-16">
         <div className="mx-auto max-w-6xl">
           <Contrast
-            not="Most companies will eventually add AI."
-            then="We were built around it."
+            not="Not AI added later —"
+            then="built around it from day one."
           />
           <Contrast
             not="We don't model the industry —"
@@ -142,7 +142,7 @@ function TechnologyPage() {
         eyebrow="Why this matters now"
         headline="The next decade of jewelry will be designed differently."
         pulses={[0, 2, 4]}
-        closer="Not to add AI later — to have built around it."
+        closer="Built around AI."
       >
         <div className="grid max-w-5xl gap-10 text-lg leading-relaxed text-white/75 md:grid-cols-2">
           <p>
@@ -158,7 +158,7 @@ function TechnologyPage() {
         </div>
       </Beat>
 
-      <PageCloser line="The future of design is owned." />
+      <PageCloser line="The design layer is owned." />
 
       <ContinueJourney to="/diamonds" label="Continue the journey →" />
     </DeepDivePage>

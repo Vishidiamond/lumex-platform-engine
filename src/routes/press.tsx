@@ -26,7 +26,7 @@ export const Route = createFileRoute("/press")({
 const MONO = { fontFamily: "var(--font-mono)" } as const;
 
 const BOILERPLATE =
-  "Lumex is a technology and platform company rebuilding the diamond and jewelry industry from the ground up. Founded in 2018 and headquartered in Dubai, Lumex owns the AI that designs the product, the platform that trades it, and the brands that sell it. The company operates across 20+ geographies with 200+ active clients.";
+  "Lumex is a technology and platform company rebuilding the diamond and jewelry industry from the ground up. Not a brand with a tech division — a platform company that owns the AI that designs the product, the rails that trade it, and the brands that sell it. Founded in 2018, headquartered in Dubai, operating across 20+ geographies with 200+ active clients.";
 
 const COVERAGE: { publication: string; headline: string; date: string; href: string }[] = [
   { publication: "[Publication]", headline: "[Headline placeholder — feature on Lumex platform launch.]", date: "[Month YYYY]", href: "#" },
@@ -54,7 +54,7 @@ const FACTS: { label: string; value: string }[] = [
   { label: "Patented diamond shapes", value: "30" },
   { label: "Proprietary jewelry styles", value: "1,000+" },
   { label: "Foundational IP", value: "NSphere CAD merging patent + generation extension" },
-  { label: "Sub-brands", value: "Atelier Amara (in-house luxury modular), Fortunoff (U.S. heritage revival)" },
+  { label: "Sub-brands", value: "Atelier Amara (in-house luxury modular), Fortunoff (licensed U.S. revival)" },
   { label: "Platform", value: "Lumex.online" },
 ];
 

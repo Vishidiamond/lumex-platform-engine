@@ -58,7 +58,7 @@ function HousePage() {
         eyebrow="The thesis"
         headline="The future of the industry is full jewelry."
         pulses={BRIDGE}
-        closer="Not loose stones alone — owned categories."
+        closer="Not stones alone — categories."
       >
         <div className="grid max-w-5xl gap-10 text-lg leading-relaxed text-white/75 md:grid-cols-2 md:gap-16">
           <p>
@@ -126,7 +126,7 @@ function HousePage() {
         <SubBrand
           lockup="FORTUNOFF"
           serif
-          paragraph="Fortunoff is the licensed U.S. heritage revival — an American jewelry name with deep customer recognition, brought back on modern rails. The voice is warm and classic; the back-end is engineered, automated, and shared with the rest of the house."
+          paragraph="Fortunoff is the licensed U.S. heritage revival — an American jewelry name with deep customer recognition, brought back on modern rails. The voice is warm and familiar; the back-end is engineered, automated, and shared with the rest of the house."
           ctaLabel="Visit Fortunoff"
           ctaHref="https://fortunoff.com"
         />
