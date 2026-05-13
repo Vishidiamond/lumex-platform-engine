@@ -80,7 +80,7 @@ const PARAMS_BY_ID: Record<Constellation3D["id"], PulseParams> = {
   house: DEFAULT_PARAMS,
 };
 
-const FORESHADOW_EASE = bezier(FORESHADOW.ease);
+// (FORESHADOW_EASE removed — strategies use local easeOutQuint/easeInOutCubic.)
 
 function easeOutQuint(t: number) {
   return 1 - Math.pow(1 - t, 5);
