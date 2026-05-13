@@ -9,8 +9,56 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as TechnologyRouteImport } from './routes/technology'
+import { Route as PressRouteImport } from './routes/press'
+import { Route as PlatformRouteImport } from './routes/platform'
+import { Route as JewelryRouteImport } from './routes/jewelry'
+import { Route as DiamondsRouteImport } from './routes/diamonds'
+import { Route as ContactRouteImport } from './routes/contact'
+import { Route as BrandsRouteImport } from './routes/brands'
+import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
 
+const TechnologyRoute = TechnologyRouteImport.update({
+  id: '/technology',
+  path: '/technology',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PressRoute = PressRouteImport.update({
+  id: '/press',
+  path: '/press',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PlatformRoute = PlatformRouteImport.update({
+  id: '/platform',
+  path: '/platform',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const JewelryRoute = JewelryRouteImport.update({
+  id: '/jewelry',
+  path: '/jewelry',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DiamondsRoute = DiamondsRouteImport.update({
+  id: '/diamonds',
+  path: '/diamonds',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ContactRoute = ContactRouteImport.update({
+  id: '/contact',
+  path: '/contact',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BrandsRoute = BrandsRouteImport.update({
+  id: '/brands',
+  path: '/brands',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AboutRoute = AboutRouteImport.update({
+  id: '/about',
+  path: '/about',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -19,28 +67,144 @@ const IndexRoute = IndexRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
+  '/brands': typeof BrandsRoute
+  '/contact': typeof ContactRoute
+  '/diamonds': typeof DiamondsRoute
+  '/jewelry': typeof JewelryRoute
+  '/platform': typeof PlatformRoute
+  '/press': typeof PressRoute
+  '/technology': typeof TechnologyRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
+  '/brands': typeof BrandsRoute
+  '/contact': typeof ContactRoute
+  '/diamonds': typeof DiamondsRoute
+  '/jewelry': typeof JewelryRoute
+  '/platform': typeof PlatformRoute
+  '/press': typeof PressRoute
+  '/technology': typeof TechnologyRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
+  '/brands': typeof BrandsRoute
+  '/contact': typeof ContactRoute
+  '/diamonds': typeof DiamondsRoute
+  '/jewelry': typeof JewelryRoute
+  '/platform': typeof PlatformRoute
+  '/press': typeof PressRoute
+  '/technology': typeof TechnologyRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/about'
+    | '/brands'
+    | '/contact'
+    | '/diamonds'
+    | '/jewelry'
+    | '/platform'
+    | '/press'
+    | '/technology'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/about'
+    | '/brands'
+    | '/contact'
+    | '/diamonds'
+    | '/jewelry'
+    | '/platform'
+    | '/press'
+    | '/technology'
+  id:
+    | '__root__'
+    | '/'
+    | '/about'
+    | '/brands'
+    | '/contact'
+    | '/diamonds'
+    | '/jewelry'
+    | '/platform'
+    | '/press'
+    | '/technology'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AboutRoute: typeof AboutRoute
+  BrandsRoute: typeof BrandsRoute
+  ContactRoute: typeof ContactRoute
+  DiamondsRoute: typeof DiamondsRoute
+  JewelryRoute: typeof JewelryRoute
+  PlatformRoute: typeof PlatformRoute
+  PressRoute: typeof PressRoute
+  TechnologyRoute: typeof TechnologyRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/technology': {
+      id: '/technology'
+      path: '/technology'
+      fullPath: '/technology'
+      preLoaderRoute: typeof TechnologyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/press': {
+      id: '/press'
+      path: '/press'
+      fullPath: '/press'
+      preLoaderRoute: typeof PressRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/platform': {
+      id: '/platform'
+      path: '/platform'
+      fullPath: '/platform'
+      preLoaderRoute: typeof PlatformRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/jewelry': {
+      id: '/jewelry'
+      path: '/jewelry'
+      fullPath: '/jewelry'
+      preLoaderRoute: typeof JewelryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/diamonds': {
+      id: '/diamonds'
+      path: '/diamonds'
+      fullPath: '/diamonds'
+      preLoaderRoute: typeof DiamondsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/contact': {
+      id: '/contact'
+      path: '/contact'
+      fullPath: '/contact'
+      preLoaderRoute: typeof ContactRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/brands': {
+      id: '/brands'
+      path: '/brands'
+      fullPath: '/brands'
+      preLoaderRoute: typeof BrandsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/about': {
+      id: '/about'
+      path: '/about'
+      fullPath: '/about'
+      preLoaderRoute: typeof AboutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -53,7 +217,25 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AboutRoute: AboutRoute,
+  BrandsRoute: BrandsRoute,
+  ContactRoute: ContactRoute,
+  DiamondsRoute: DiamondsRoute,
+  JewelryRoute: JewelryRoute,
+  PlatformRoute: PlatformRoute,
+  PressRoute: PressRoute,
+  TechnologyRoute: TechnologyRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
