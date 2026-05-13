@@ -267,17 +267,6 @@ function CompleteJourney() {
           Complete the journey →
         </Link>
       </div>
-      <UnusedSilencer />
     </section>
   );
-}
-
-/* tiny no-op so importing usePulseControl/useEffect stays linted-clean
- * if a future edit removes a hover handler — keeps imports honest */
-function UnusedSilencer() {
-  const setPulse = usePulseControl();
-  useEffect(() => {
-    void setPulse;
-  }, [setPulse]);
-  return null;
 }
