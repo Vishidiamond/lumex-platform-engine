@@ -515,6 +515,16 @@ function CameraRig({
       nearMat.size += (target - nearMat.size) * 0.18;
     }
 
+    // Sub-stage B (the lift): far-tier opacity ramps 0.45 → 0.65 as the sky reveals.
+    const farMat = tiers.far.current.material;
+    if (farMat) {
+      const a = BEAT10.subB.start;
+      const b = BEAT10.subB.end;
+      const liftT = Math.min(1, Math.max(0, (p - a) / Math.max(1e-6, b - a)));
+      const farTarget = 0.45 + (0.65 - 0.45) * liftT;
+      farMat.opacity += (farTarget - farMat.opacity) * 0.15;
+    }
+
     // Camera velocity (units / sec)
     sceneState.cameraVel
       .copy(driftedPos.current)
@@ -613,7 +623,7 @@ function Scene({ reduceMotion }: { reduceMotion: boolean }) {
       <DenseTransitStars />
       <AllConstellations />
       <AllConstellationLines reduceMotion={reduceMotion} />
-      <FullSkyScaffolding />
+      <ScaffoldLines reduceMotion={reduceMotion} />
       <CameraRig reduceMotion={reduceMotion} tiers={{ near: nearRef, mid: midRef, far: farRef }} />
     </>
   );
