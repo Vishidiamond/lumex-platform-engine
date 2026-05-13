@@ -126,7 +126,7 @@ function HousePage() {
         <SubBrand
           lockup="FORTUNOFF"
           serif
-          paragraph="Fortunoff is the licensed U.S. heritage revival — an American jewelry name with deep customer recognition, brought back on modern rails. The voice is warm and classic; the back-end is engineered, automated, and shared with the rest of the house."
+          paragraph="Fortunoff is the licensed U.S. heritage revival — an American jewelry name with deep customer recognition, brought back on modern rails. The voice is warm and familiar; the back-end is engineered, automated, and shared with the rest of the house."
           ctaLabel="Visit Fortunoff"
           ctaHref="https://fortunoff.com"
         />
