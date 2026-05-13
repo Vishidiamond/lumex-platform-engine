@@ -64,6 +64,13 @@ export function useBeatPulse(stars: number[]) {
   return ref;
 }
 
+/** Imperative pulse handle. Call setPulse([...indices]) at any time
+ *  (e.g. on hover) to override the active overhead pulse. */
+export function usePulseControl() {
+  const ctx = useContext(PulseContext);
+  return ctx?.setActive ?? (() => {});
+}
+
 /* ─────────── Right-hand constellation rail ─────────── */
 
 function ConstellationRail({
