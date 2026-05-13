@@ -552,52 +552,6 @@ function CameraRig({
   return null;
 }
 
-/* ─────────────── Sky scaffolding (visible only at full pullback) ─────────────── */
-
-function FullSkyScaffolding() {
-  const ref = useRef<THREE.LineSegments>(null);
-
-  const geom = useMemo(() => {
-    const pts: number[] = [];
-    const centers = CONSTELLATIONS.map((c) => c.center);
-    const pairs: [number, number][] = [
-      [0, 1], [1, 2], [2, 3], [3, 0], [0, 2], [1, 3],
-    ];
-    pairs.forEach(([a, b]) => {
-      pts.push(...centers[a], ...centers[b]);
-    });
-    const g = new THREE.BufferGeometry();
-    g.setAttribute("position", new THREE.BufferAttribute(new Float32Array(pts), 3));
-    return g;
-  }, []);
-
-  useFrame(() => {
-    const p = scrollStore.get();
-    const start = KEYFRAMES[KEYFRAMES.length - 2].progress;
-    const end = KEYFRAMES[KEYFRAMES.length - 1].progress;
-    const local = Math.min(1, Math.max(0, (p - start) / Math.max(1e-6, end - start)));
-    const o = local * local * 0.45;
-    const mat = ref.current?.material as THREE.LineBasicMaterial | undefined;
-    if (mat && Math.abs(mat.opacity - o) > 1e-3) {
-      mat.opacity = o;
-      mat.visible = o > 0.001;
-    }
-  });
-
-  return (
-    <lineSegments ref={ref}>
-      <primitive object={geom} attach="geometry" />
-      <lineBasicMaterial
-        color="#a9bbe0"
-        transparent
-        opacity={0}
-        depthWrite={false}
-        blending={THREE.AdditiveBlending}
-      />
-    </lineSegments>
-  );
-}
-
 /* ─────────────── Scene root ─────────────── */
 
 function Scene({ reduceMotion }: { reduceMotion: boolean }) {

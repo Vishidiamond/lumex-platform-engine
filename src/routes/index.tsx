@@ -417,17 +417,6 @@ function MiniSky() {
   );
 }
 
-function FullSky({ active }: { active: boolean }) {
-  return (
-    <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
-      {(["rails", "sphere", "lattice", "house"] as const).map((p) => (
-        <div key={p} className="aspect-[5/3]">
-          <Constellation pattern={p} active={active} />
-        </div>
-      ))}
-    </div>
-  );
-}
 
 function labelFor(p: "rails" | "sphere" | "lattice" | "house") {
   switch (p) {
