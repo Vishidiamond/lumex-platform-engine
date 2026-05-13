@@ -6,9 +6,7 @@ import {
   Beat,
   Contrast,
   PageCloser,
-  usePulseControl,
 } from "@/components/site/DeepDive";
-import { useEffect } from "react";
 
 const SITE = "https://lumexconstellation.com";
 
