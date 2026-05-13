@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { Menu, X } from "lucide-react";
 import { cn } from "@/lib/utils";
+import lumexLogo from "@/assets/lumex-logo.png";
 
 const NAV = [
   { to: "/platform", label: "Platform" },
@@ -18,8 +19,8 @@ export function Header() {
   return (
     <header className="sticky top-0 z-50 border-b border-border/60 bg-background/85 backdrop-blur supports-[backdrop-filter]:bg-background/70">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6 md:px-10">
-        <Link to="/" className="flex items-center gap-2" onClick={() => setOpen(false)}>
-          <span className="text-lg font-semibold tracking-tight text-foreground">Lumex</span>
+        <Link to="/" className="flex items-center gap-2" onClick={() => setOpen(false)} aria-label="Lumex — Home">
+          <img src={lumexLogo} alt="Lumex" className="h-8 w-auto" />
         </Link>
 
         <nav className="hidden items-center gap-8 md:flex">
