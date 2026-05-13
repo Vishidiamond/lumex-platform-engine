@@ -5,6 +5,7 @@ import { scrollStore } from "@/lib/scroll-store";
 import { sceneState } from "@/lib/scene-state";
 import { CONSTELLATIONS, CONSTELLATION_BY_ID, type Constellation3D } from "./constellations3d";
 import { AllConstellationLines } from "./ConstellationLines";
+import { AllConstellationStars } from "./ConstellationStars";
 import { ScaffoldLines } from "./ScaffoldLines";
 import {
   ARRIVAL_SPRINGS,
@@ -575,7 +576,7 @@ function Scene({ reduceMotion }: { reduceMotion: boolean }) {
       />
       <NearTierStreaks nearRef={nearRef} />
       <DenseTransitStars />
-      <AllConstellations />
+      <AllConstellationStars />
       <AllConstellationLines reduceMotion={reduceMotion} />
       <ScaffoldLines reduceMotion={reduceMotion} />
       <CameraRig reduceMotion={reduceMotion} tiers={{ near: nearRef, mid: midRef, far: farRef }} />

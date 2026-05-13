@@ -106,6 +106,8 @@ function ConstellationLineGroup({
         const db = (r.bx - cx) ** 2 + (r.by - cy) ** 2 + (r.bz - cz) ** 2;
         r.startIsA = da <= db;
       }
+      // Publish to scene-state so per-star pulses can sync to segment completions.
+      sceneState.arrivalTriggers[con.id] = triggeredAt.current;
     }
 
     if (triggeredAt.current === null) return;
