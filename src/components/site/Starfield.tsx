@@ -5,12 +5,26 @@ import { scrollStore } from "@/lib/scroll-store";
 import { sceneState } from "@/lib/scene-state";
 import { CONSTELLATIONS, CONSTELLATION_BY_ID, type Constellation3D } from "./constellations3d";
 import { AllConstellationLines } from "./ConstellationLines";
+import { ScaffoldLines } from "./ScaffoldLines";
 import {
   ARRIVAL_SPRINGS,
   arrivalLookAt,
   makeSpringRuntime,
   stepSpring,
 } from "./arrival-springs";
+import {
+  AMBIENT_DRIFT,
+  BEAT10,
+  DENSE_TRANSIT,
+  FORESHADOW,
+  KEYFRAMES,
+  PARALLAX,
+  STREAK,
+  TRANSITS,
+  bezier,
+  makePose,
+  resolvePose,
+} from "./camera-config";
 import {
   AMBIENT_DRIFT,
   DENSE_TRANSIT,
