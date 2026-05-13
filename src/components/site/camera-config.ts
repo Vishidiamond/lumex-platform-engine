@@ -56,8 +56,6 @@ export const KEYFRAMES: Keyframe[] = [
   { progress: 0.78, position: [-50, 0, -850],  target: [-100, 50, -1000], fov: 65, kind: "transit", easeIn: EASING.transit },
   // 9 — Arrival: House
   { progress: 0.86, position: [-90, 50, -950], target: [-100, 50, -1000], fov: 55, kind: "arrival", easeIn: EASING.arrival },
-  // 9 — Arrival: House
-  { progress: 0.86, position: [-90, 50, -950], target: [-100, 50, -1000], fov: 55, kind: "arrival", easeIn: EASING.arrival },
   // 10 — Pullback sub-stage A: slow recede from House (other constellations creep into peripheral view)
   { progress: 0.92, position: [-40, 80, -400], target: [-100, 50, -1000], fov: 55, kind: "pullback", easeIn: EASING.recede },
   // 11 — Pullback sub-stage B: the lift — camera lifts and rotates upward, lookAt swings to sky-center
