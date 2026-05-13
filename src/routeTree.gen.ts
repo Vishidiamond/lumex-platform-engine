@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as TechnologyRouteImport } from './routes/technology'
 import { Route as PressRouteImport } from './routes/press'
 import { Route as PlatformRouteImport } from './routes/platform'
+import { Route as HouseRouteImport } from './routes/house'
 import { Route as DiamondsRouteImport } from './routes/diamonds'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as AboutRouteImport } from './routes/about'
@@ -30,6 +31,11 @@ const PressRoute = PressRouteImport.update({
 const PlatformRoute = PlatformRouteImport.update({
   id: '/platform',
   path: '/platform',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HouseRoute = HouseRouteImport.update({
+  id: '/house',
+  path: '/house',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DiamondsRoute = DiamondsRouteImport.update({
@@ -58,6 +64,7 @@ export interface FileRoutesByFullPath {
   '/about': typeof AboutRoute
   '/contact': typeof ContactRoute
   '/diamonds': typeof DiamondsRoute
+  '/house': typeof HouseRoute
   '/platform': typeof PlatformRoute
   '/press': typeof PressRoute
   '/technology': typeof TechnologyRoute
@@ -67,6 +74,7 @@ export interface FileRoutesByTo {
   '/about': typeof AboutRoute
   '/contact': typeof ContactRoute
   '/diamonds': typeof DiamondsRoute
+  '/house': typeof HouseRoute
   '/platform': typeof PlatformRoute
   '/press': typeof PressRoute
   '/technology': typeof TechnologyRoute
@@ -77,6 +85,7 @@ export interface FileRoutesById {
   '/about': typeof AboutRoute
   '/contact': typeof ContactRoute
   '/diamonds': typeof DiamondsRoute
+  '/house': typeof HouseRoute
   '/platform': typeof PlatformRoute
   '/press': typeof PressRoute
   '/technology': typeof TechnologyRoute
@@ -88,6 +97,7 @@ export interface FileRouteTypes {
     | '/about'
     | '/contact'
     | '/diamonds'
+    | '/house'
     | '/platform'
     | '/press'
     | '/technology'
@@ -97,6 +107,7 @@ export interface FileRouteTypes {
     | '/about'
     | '/contact'
     | '/diamonds'
+    | '/house'
     | '/platform'
     | '/press'
     | '/technology'
@@ -106,6 +117,7 @@ export interface FileRouteTypes {
     | '/about'
     | '/contact'
     | '/diamonds'
+    | '/house'
     | '/platform'
     | '/press'
     | '/technology'
@@ -116,6 +128,7 @@ export interface RootRouteChildren {
   AboutRoute: typeof AboutRoute
   ContactRoute: typeof ContactRoute
   DiamondsRoute: typeof DiamondsRoute
+  HouseRoute: typeof HouseRoute
   PlatformRoute: typeof PlatformRoute
   PressRoute: typeof PressRoute
   TechnologyRoute: typeof TechnologyRoute
@@ -142,6 +155,13 @@ declare module '@tanstack/react-router' {
       path: '/platform'
       fullPath: '/platform'
       preLoaderRoute: typeof PlatformRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/house': {
+      id: '/house'
+      path: '/house'
+      fullPath: '/house'
+      preLoaderRoute: typeof HouseRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/diamonds': {
@@ -180,6 +200,7 @@ const rootRouteChildren: RootRouteChildren = {
   AboutRoute: AboutRoute,
   ContactRoute: ContactRoute,
   DiamondsRoute: DiamondsRoute,
+  HouseRoute: HouseRoute,
   PlatformRoute: PlatformRoute,
   PressRoute: PressRoute,
   TechnologyRoute: TechnologyRoute,
