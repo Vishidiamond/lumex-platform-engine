@@ -114,13 +114,13 @@ export const PARALLAX = {
  * KEYFRAMES[i] → KEYFRAMES[i+1] is a transit). Destination constellation
  * defines which constellation gets the foreshadowing pulse.
  */
-export const TRANSITS: { segIndex: number; destination: "sphere" | "lattice" | "house"; lateralOffsetPct: number; line: string }[] = [
-  // Segment 3 → 4 (Beat 4 to Sphere)
-  { segIndex: 3, destination: "sphere",  lateralOffsetPct: -8, line: "Underneath every transaction — a layer of intelligence." },
-  // Segment 5 → 6 (Beat 6 to Lattice)
-  { segIndex: 5, destination: "lattice", lateralOffsetPct:  8, line: "Precision is the product." },
-  // Segment 7 → 8 (Beat 8 to House)
-  { segIndex: 7, destination: "house",   lateralOffsetPct: -8, line: "The category moves up the value chain." },
+export const TRANSITS: { segIndex: number; destination: "sphere" | "lattice" | "house"; lateralOffsetPct: number; verticalPct: number; line: string }[] = [
+  // Segment 3 → 4 (Beat 4 to Sphere) — left, slightly above center
+  { segIndex: 3, destination: "sphere",  lateralOffsetPct: -8, verticalPct: 45, line: "Underneath every transaction — a layer of intelligence." },
+  // Segment 5 → 6 (Beat 6 to Lattice) — right, slightly below center
+  { segIndex: 5, destination: "lattice", lateralOffsetPct:  8, verticalPct: 55, line: "Precision is the product." },
+  // Segment 7 → 8 (Beat 8 to House) — centered, high (anticipating House scale)
+  { segIndex: 7, destination: "house",   lateralOffsetPct:  0, verticalPct: 38, line: "The category moves up the value chain." },
 ];
 
 /** Foreshadowing pulse — applied to destination constellation at transit midpoint. */
