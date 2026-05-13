@@ -49,7 +49,7 @@ function Index() {
             <Proof title="Logistics" line="Movement of stones, tracked across the network." />
           </div>
         }
-        closer="Infrastructure, not a website."
+        closer="Not a website — infrastructure."
         primaryCta={{ label: "Visit Lumex.online", href: "https://lumex.online", external: true }}
         secondaryCta={{ label: "See the platform", to: "/platform" }}
       />
@@ -66,7 +66,7 @@ function Index() {
             <Proof title="Automated" line="Sorting from the factory floor." />
           </div>
         }
-        closer="The future of design is owned."
+        closer="Not a feature — the layer."
         primaryCta={{ label: "Visit NSphere.ai", href: "https://nsphere.ai", external: true }}
         secondaryCta={{ label: "See the technology", to: "/technology" }}
       />
@@ -76,7 +76,7 @@ function Index() {
         pattern="lattice"
         headline="Calibrated. Machine-sorted. Engineered for precision."
         subhead="30 patented shapes. Tight tolerances. Defensible cuts."
-        closer="Precision is the product."
+        closer="Not broad — exact."
         secondaryCta={{ label: "See the diamonds", to: "/diamonds" }}
       />
       <BeatTransit line="The category moves up the value chain." />
@@ -399,7 +399,7 @@ function BrandsRow() {
     },
     {
       title: "Fortunoff",
-      line: "An American jewelry heritage, revived on modern rails.",
+      line: "An American jewelry name, revived on modern rails.",
     },
     {
       title: "More to come",

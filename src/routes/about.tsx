@@ -49,7 +49,7 @@ function AboutPage() {
             </h1>
             <p className="mt-8 max-w-2xl text-lg text-white/70">
               Lumex was founded in 2018 by Vishal Mehta. Backed by a century of
-              family experience in the natural diamond industry. Operated as a
+              trade experience in the natural diamond industry. Operated as a
               technology and platform company.
             </p>
           </div>
@@ -206,7 +206,7 @@ function AboutPage() {
             className="mx-auto max-w-3xl text-xl uppercase text-white md:text-2xl"
             style={{ ...MONO, letterSpacing: "0.32em" }}
           >
-            The trade behind us. The future in front of us.
+            The future is the work.
           </p>
           <div className="mt-14 flex justify-center">
             <Link to="/" className="ghost-cta-about">

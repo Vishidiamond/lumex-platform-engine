@@ -94,7 +94,7 @@ function PlatformPage() {
       <section className="relative px-6 py-12 md:px-10 md:py-16">
         <div className="mx-auto max-w-6xl">
           <Contrast
-            not="We don't replace brokers —"
+            not="We don't route around brokers —"
             then="we give them a path forward."
           />
           <Contrast

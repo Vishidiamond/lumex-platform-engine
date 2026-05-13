@@ -58,7 +58,7 @@ function HousePage() {
         eyebrow="The thesis"
         headline="The future of the industry is full jewelry."
         pulses={BRIDGE}
-        closer="Not loose stones alone — owned categories."
+        closer="Not stones alone — categories."
       >
         <div className="grid max-w-5xl gap-10 text-lg leading-relaxed text-white/75 md:grid-cols-2 md:gap-16">
           <p>
