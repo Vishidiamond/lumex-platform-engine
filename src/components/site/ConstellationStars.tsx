@@ -251,11 +251,17 @@ function ConstellationStarsGroup({
   const lastSpawnedSeq = useRef(-1);
   const pulses = useRef<ActivePulse[]>([]);
 
+  // Foreshadow one-shot state
+  const fsArmed = useRef(true);
+  const fsStartedAt = useRef<number | null>(null);
+  const fsPrevProgress = useRef(0);
+
   // Per-frame scratch (avoid allocation)
   const scaleAdd = useMemo(() => new Float32Array(con.stars.length), [con]);
   const emissiveAdd = useMemo(() => new Float32Array(con.stars.length), [con]);
   const haloOp = useMemo(() => new Float32Array(con.stars.length), [con]);
   const haloScale = useMemo(() => new Float32Array(con.stars.length), [con]);
+  const foreshadowAdd = useMemo(() => new Float32Array(con.stars.length), [con]);
 
   const halo = getHaloTexture();
 
