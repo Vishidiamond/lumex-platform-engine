@@ -59,7 +59,7 @@ function ContactPage() {
               Talk to Lumex.
             </h1>
             <p className="mt-8 max-w-2xl text-lg text-white/70">
-              For trade, partner, or press inquiries, the right route is below.
+              Not a single inbox — three routes for three audiences. Trade, brand, and press each have their own desk below.
             </p>
           </div>
         </header>
