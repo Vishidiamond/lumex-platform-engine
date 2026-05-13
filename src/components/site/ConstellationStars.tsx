@@ -315,23 +315,37 @@ function ConstellationStarsGroup({
       }
     }
 
-    // Constellation-wide foreshadow pulse (preserved from prior implementation).
-    let foreshadowPulse = 0;
-    const transit = TRANSITS.find((t) => t.segIndex === sceneState.segIndex);
-    if (transit && transit.destination === con.id) {
-      const t = sceneState.segT;
-      if (t > FORESHADOW.startSegT && t < FORESHADOW.endSegT) {
-        const up =
-          (t - FORESHADOW.startSegT) /
-          Math.max(1e-6, FORESHADOW.peakSegT - FORESHADOW.startSegT);
-        const dn =
-          (FORESHADOW.endSegT - t) /
-          Math.max(1e-6, FORESHADOW.endSegT - FORESHADOW.peakSegT);
-        const tri = Math.min(1, Math.max(0, Math.min(up, dn)));
-        foreshadowPulse = FORESHADOW_EASE(tri);
+    // ── Per-constellation foreshadow (one-shot, forward-only) ──
+    foreshadowAdd.fill(0);
+    const fsTrigger = FORESHADOW_TRIGGERS[con.id];
+    if (fsTrigger > 0) {
+      const p = scrollStore.get();
+      // Re-arm when scroll falls back below threshold (with hysteresis).
+      if (!fsArmed.current && p < fsTrigger - FORESHADOW_REARM_HYSTERESIS) {
+        fsArmed.current = true;
+      }
+      // Fire on forward crossing.
+      if (
+        fsArmed.current &&
+        fsPrevProgress.current < fsTrigger &&
+        p >= fsTrigger
+      ) {
+        fsStartedAt.current = now;
+        fsArmed.current = false;
+      }
+      fsPrevProgress.current = p;
+
+      if (fsStartedAt.current !== null) {
+        const elapsed = now - fsStartedAt.current;
+        const stillActive = applyForeshadow(
+          con,
+          elapsed,
+          sceneState.reduceMotion,
+          foreshadowAdd,
+        );
+        if (!stillActive) fsStartedAt.current = null;
       }
     }
-    const foreshadowMul = 1 + FORESHADOW.boost * foreshadowPulse;
 
     // Reset per-frame sums.
     const n = con.stars.length;
