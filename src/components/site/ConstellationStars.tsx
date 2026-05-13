@@ -2,7 +2,7 @@ import { useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { sceneState } from "@/lib/scene-state";
-import { TRANSITS, FORESHADOW, bezier } from "./camera-config";
+import { scrollStore } from "@/lib/scroll-store";
 import { type Constellation3D, CONSTELLATIONS } from "./constellations3d";
 import { ARRIVAL_CONFIGS } from "./constellation-connections";
 
@@ -80,7 +80,7 @@ const PARAMS_BY_ID: Record<Constellation3D["id"], PulseParams> = {
   house: DEFAULT_PARAMS,
 };
 
-const FORESHADOW_EASE = bezier(FORESHADOW.ease);
+// (FORESHADOW_EASE removed — strategies use local easeOutQuint/easeInOutCubic.)
 
 function easeOutQuint(t: number) {
   return 1 - Math.pow(1 - t, 5);
@@ -93,6 +93,108 @@ function pulseEnvelope(t: number, peakAt: number, duration: number): number {
   if (t >= duration) return 0;
   if (t <= peakAt) return easeOutQuint(t / peakAt);
   return 1 - easeInOutCubic((t - peakAt) / (duration - peakAt));
+}
+
+/* ─────────────── Per-constellation foreshadowing strategies ─────────────── */
+
+/** scrollProgress at which each constellation's foreshadow fires (one-shot, forward). */
+const FORESHADOW_TRIGGERS: Record<Constellation3D["id"], number> = {
+  rails: -1, // Rails is the first arrival; no transit foreshadow.
+  sphere: 0.42,
+  lattice: 0.62,
+  house: 0.82,
+};
+
+const FORESHADOW_REARM_HYSTERESIS = 0.02;
+
+/** Reduced-motion fallback: single 200ms uniform 1.4× bump. */
+function applyForeshadowReducedMotion(elapsed: number, out: Float32Array): boolean {
+  const dur = 200;
+  if (elapsed >= dur) return false;
+  const env = elapsed < 50 ? elapsed / 50 : Math.max(0, 1 - (elapsed - 50) / 150);
+  const add = 0.4 * env;
+  for (let i = 0; i < out.length; i++) out[i] += add;
+  return true;
+}
+
+/**
+ * Per-constellation strategy. Adds multiplicative *additions* to `out[i]`
+ * (final star multiplier = 1 + out[i]). Returns false when the envelope is
+ * fully spent so the caller can release the trigger.
+ */
+function applyForeshadow(
+  con: Constellation3D,
+  elapsed: number,
+  reduceMotion: boolean,
+  out: Float32Array,
+): boolean {
+  if (reduceMotion) return applyForeshadowReducedMotion(elapsed, out);
+
+  switch (con.id) {
+    case "sphere": {
+      // Uniform glow: peak 1.4× at ~150ms, full envelope 700ms.
+      const totalDur = 700;
+      if (elapsed >= totalDur + 100) return false; // small grace tail
+      const uniformEnv = pulseEnvelope(elapsed, 150, totalDur);
+      const uniformAdd = 0.4 * uniformEnv;
+      for (let i = 0; i < out.length; i++) out[i] += uniformAdd;
+      // Delayed core flash on star 0 (the sphere's brightest center): starts
+      // at +200ms, peak +100ms in, decays over 400ms (500ms total).
+      const coreT = elapsed - 200;
+      if (coreT >= 0 && coreT < 500) {
+        const coreEnv = pulseEnvelope(coreT, 100, 500);
+        // Adds another 0.4 → at simultaneous peaks the core hits ~1.8×.
+        out[0] += 0.4 * coreEnv;
+      }
+      return true;
+    }
+    case "lattice": {
+      // Directional sweep top→bottom (row 0 → row 3). 7 cols × 4 rows.
+      const cols = 7;
+      const rows = 4;
+      const rowDelay = 80;
+      const rowDur = 280;
+      const totalDur = (rows - 1) * rowDelay + rowDur;
+      if (elapsed >= totalDur + 80) return false;
+      for (let r = 0; r < rows; r++) {
+        const rT = elapsed - r * rowDelay;
+        if (rT < 0 || rT >= rowDur) continue;
+        const env = pulseEnvelope(rT, 80, rowDur);
+        const add = 0.6 * env; // peak 1.6×
+        for (let c = 0; c < cols; c++) {
+          const idx = r * cols + c;
+          if (idx < out.length) out[idx] += add;
+        }
+      }
+      return true;
+    }
+    case "house": {
+      // Three sub-cluster cascade. Atelier Amara → Fortunoff → "next acquisition".
+      // 120ms offset between cluster starts; 340ms per-cluster envelope.
+      const dur = 340;
+      const offset = 120;
+      const totalDur = 2 * offset + dur; // ~580ms
+      if (elapsed >= totalDur + 60) return false;
+      const clusters: Array<{ start: number; intensity: number; idxs: number[] }> = [
+        { start: 0,            intensity: 0.5, idxs: [0, 1, 2, 3, 4] },         // A — Atelier Amara, 1.5×
+        { start: offset,       intensity: 0.5, idxs: [5, 6, 7, 8, 9] },         // B — Fortunoff, 1.5×
+        { start: 2 * offset,   intensity: 0.3, idxs: [10, 11, 12] },            // C — third sub-cluster, 1.3×
+        // bridges 13, 14 deliberately skipped — scaffold is reserved for arrival
+      ];
+      for (const cl of clusters) {
+        const t = elapsed - cl.start;
+        if (t < 0 || t >= dur) continue;
+        const env = pulseEnvelope(t, 110, dur);
+        const add = cl.intensity * env;
+        for (const i of cl.idxs) {
+          if (i < out.length) out[i] += add;
+        }
+      }
+      return true;
+    }
+    default:
+      return false;
+  }
 }
 
 /* ─────────────── Halo billboard texture ─────────────── */
@@ -149,11 +251,17 @@ function ConstellationStarsGroup({
   const lastSpawnedSeq = useRef(-1);
   const pulses = useRef<ActivePulse[]>([]);
 
+  // Foreshadow one-shot state
+  const fsArmed = useRef(true);
+  const fsStartedAt = useRef<number | null>(null);
+  const fsPrevProgress = useRef(0);
+
   // Per-frame scratch (avoid allocation)
   const scaleAdd = useMemo(() => new Float32Array(con.stars.length), [con]);
   const emissiveAdd = useMemo(() => new Float32Array(con.stars.length), [con]);
   const haloOp = useMemo(() => new Float32Array(con.stars.length), [con]);
   const haloScale = useMemo(() => new Float32Array(con.stars.length), [con]);
+  const foreshadowAdd = useMemo(() => new Float32Array(con.stars.length), [con]);
 
   const halo = getHaloTexture();
 
@@ -207,23 +315,37 @@ function ConstellationStarsGroup({
       }
     }
 
-    // Constellation-wide foreshadow pulse (preserved from prior implementation).
-    let foreshadowPulse = 0;
-    const transit = TRANSITS.find((t) => t.segIndex === sceneState.segIndex);
-    if (transit && transit.destination === con.id) {
-      const t = sceneState.segT;
-      if (t > FORESHADOW.startSegT && t < FORESHADOW.endSegT) {
-        const up =
-          (t - FORESHADOW.startSegT) /
-          Math.max(1e-6, FORESHADOW.peakSegT - FORESHADOW.startSegT);
-        const dn =
-          (FORESHADOW.endSegT - t) /
-          Math.max(1e-6, FORESHADOW.endSegT - FORESHADOW.peakSegT);
-        const tri = Math.min(1, Math.max(0, Math.min(up, dn)));
-        foreshadowPulse = FORESHADOW_EASE(tri);
+    // ── Per-constellation foreshadow (one-shot, forward-only) ──
+    foreshadowAdd.fill(0);
+    const fsTrigger = FORESHADOW_TRIGGERS[con.id];
+    if (fsTrigger > 0) {
+      const p = scrollStore.get();
+      // Re-arm when scroll falls back below threshold (with hysteresis).
+      if (!fsArmed.current && p < fsTrigger - FORESHADOW_REARM_HYSTERESIS) {
+        fsArmed.current = true;
+      }
+      // Fire on forward crossing.
+      if (
+        fsArmed.current &&
+        fsPrevProgress.current < fsTrigger &&
+        p >= fsTrigger
+      ) {
+        fsStartedAt.current = now;
+        fsArmed.current = false;
+      }
+      fsPrevProgress.current = p;
+
+      if (fsStartedAt.current !== null) {
+        const elapsed = now - fsStartedAt.current;
+        const stillActive = applyForeshadow(
+          con,
+          elapsed,
+          sceneState.reduceMotion,
+          foreshadowAdd,
+        );
+        if (!stillActive) fsStartedAt.current = null;
       }
     }
-    const foreshadowMul = 1 + FORESHADOW.boost * foreshadowPulse;
 
     // Reset per-frame sums.
     const n = con.stars.length;
@@ -281,10 +403,13 @@ function ConstellationStarsGroup({
       if (!m || !mat) continue;
       const sAdd = Math.min(SCALE_CAP_ADD, scaleAdd[i]);
       const eAdd = Math.min(EMISSIVE_CAP_ADD, emissiveAdd[i]);
-      const finalScale = starBaseScales[i] * foreshadowMul * (1 + sAdd);
+      // Per-star foreshadow multiplier (1 + add). Caps applied so foreshadow
+      // alone never exceeds the strategy's documented peak.
+      const fsMul = 1 + Math.min(0.8, foreshadowAdd[i]);
+      const finalScale = starBaseScales[i] * fsMul * (1 + sAdd);
       m.scale.setScalar(finalScale);
 
-      const intensity = foreshadowMul * (1 + eAdd);
+      const intensity = fsMul * (1 + eAdd);
       mat.color.setRGB(
         BASE_COLOR.r * intensity,
         BASE_COLOR.g * intensity,
