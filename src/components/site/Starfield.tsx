@@ -5,6 +5,7 @@ import { scrollStore } from "@/lib/scroll-store";
 import { sceneState } from "@/lib/scene-state";
 import { CONSTELLATIONS, CONSTELLATION_BY_ID, type Constellation3D } from "./constellations3d";
 import { AllConstellationLines } from "./ConstellationLines";
+import { ScaffoldLines } from "./ScaffoldLines";
 import {
   ARRIVAL_SPRINGS,
   arrivalLookAt,
@@ -13,6 +14,7 @@ import {
 } from "./arrival-springs";
 import {
   AMBIENT_DRIFT,
+  BEAT10,
   DENSE_TRANSIT,
   FORESHADOW,
   KEYFRAMES,
@@ -23,7 +25,6 @@ import {
   makePose,
   resolvePose,
 } from "./camera-config";
-
 /* ─────────────── Star tier generation ─────────────── */
 
 const STAR_PALETTE = [
@@ -514,6 +515,16 @@ function CameraRig({
       nearMat.size += (target - nearMat.size) * 0.18;
     }
 
+    // Sub-stage B (the lift): far-tier opacity ramps 0.45 → 0.65 as the sky reveals.
+    const farMat = tiers.far.current.material;
+    if (farMat) {
+      const a = BEAT10.subB.start;
+      const b = BEAT10.subB.end;
+      const liftT = Math.min(1, Math.max(0, (p - a) / Math.max(1e-6, b - a)));
+      const farTarget = 0.45 + (0.65 - 0.45) * liftT;
+      farMat.opacity += (farTarget - farMat.opacity) * 0.15;
+    }
+
     // Camera velocity (units / sec)
     sceneState.cameraVel
       .copy(driftedPos.current)
@@ -541,52 +552,6 @@ function CameraRig({
   return null;
 }
 
-/* ─────────────── Sky scaffolding (visible only at full pullback) ─────────────── */
-
-function FullSkyScaffolding() {
-  const ref = useRef<THREE.LineSegments>(null);
-
-  const geom = useMemo(() => {
-    const pts: number[] = [];
-    const centers = CONSTELLATIONS.map((c) => c.center);
-    const pairs: [number, number][] = [
-      [0, 1], [1, 2], [2, 3], [3, 0], [0, 2], [1, 3],
-    ];
-    pairs.forEach(([a, b]) => {
-      pts.push(...centers[a], ...centers[b]);
-    });
-    const g = new THREE.BufferGeometry();
-    g.setAttribute("position", new THREE.BufferAttribute(new Float32Array(pts), 3));
-    return g;
-  }, []);
-
-  useFrame(() => {
-    const p = scrollStore.get();
-    const start = KEYFRAMES[KEYFRAMES.length - 2].progress;
-    const end = KEYFRAMES[KEYFRAMES.length - 1].progress;
-    const local = Math.min(1, Math.max(0, (p - start) / Math.max(1e-6, end - start)));
-    const o = local * local * 0.45;
-    const mat = ref.current?.material as THREE.LineBasicMaterial | undefined;
-    if (mat && Math.abs(mat.opacity - o) > 1e-3) {
-      mat.opacity = o;
-      mat.visible = o > 0.001;
-    }
-  });
-
-  return (
-    <lineSegments ref={ref}>
-      <primitive object={geom} attach="geometry" />
-      <lineBasicMaterial
-        color="#a9bbe0"
-        transparent
-        opacity={0}
-        depthWrite={false}
-        blending={THREE.AdditiveBlending}
-      />
-    </lineSegments>
-  );
-}
-
 /* ─────────────── Scene root ─────────────── */
 
 function Scene({ reduceMotion }: { reduceMotion: boolean }) {
@@ -612,7 +577,7 @@ function Scene({ reduceMotion }: { reduceMotion: boolean }) {
       <DenseTransitStars />
       <AllConstellations />
       <AllConstellationLines reduceMotion={reduceMotion} />
-      <FullSkyScaffolding />
+      <ScaffoldLines reduceMotion={reduceMotion} />
       <CameraRig reduceMotion={reduceMotion} tiers={{ near: nearRef, mid: midRef, far: farRef }} />
     </>
   );

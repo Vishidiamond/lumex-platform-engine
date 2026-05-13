@@ -16,6 +16,9 @@ export const EASING: Record<string, Bezier> = {
   transit:   [0.65, 0, 0.35, 1],  // accelerate / decelerate — fast through space
   pullback:  [0.4, 0, 0.2, 1],    // slow / fast / slow — dramatic reveal
   drift:     [0.45, 0, 0.55, 1],  // gentle sinusoidal-feeling drift
+  recede:    [0.4, 0, 0.6, 1],    // sub-stage A — gentle reverse, no drama yet
+  lift:      [0.3, 0, 0.2, 1],    // sub-stage B — accelerating lift, the dramatic acceleration
+  settle:    [0.5, 0, 0.25, 1],   // sub-stage C — slow approach to the final pose
 };
 
 export interface Keyframe {
@@ -53,9 +56,27 @@ export const KEYFRAMES: Keyframe[] = [
   { progress: 0.78, position: [-50, 0, -850],  target: [-100, 50, -1000], fov: 65, kind: "transit", easeIn: EASING.transit },
   // 9 — Arrival: House
   { progress: 0.86, position: [-90, 50, -950], target: [-100, 50, -1000], fov: 55, kind: "arrival", easeIn: EASING.arrival },
-  // 10 — The full sky (pullback)
-  { progress: 1.00, position: [0, 100, 200],   target: [0, 0, -500],   fov: 85, kind: "pullback", easeIn: EASING.pullback },
+  // 9 — Arrival: House
+  { progress: 0.86, position: [-90, 50, -950], target: [-100, 50, -1000], fov: 55, kind: "arrival", easeIn: EASING.arrival },
+  // 10 — Pullback sub-stage A: slow recede from House (other constellations creep into peripheral view)
+  { progress: 0.92, position: [-40, 80, -400], target: [-100, 50, -1000], fov: 55, kind: "pullback", easeIn: EASING.recede },
+  // 11 — Pullback sub-stage B: the lift — camera lifts and rotates upward, lookAt swings to sky-center
+  { progress: 0.97, position: [0, 200, 100],   target: [0, 0, -500],     fov: 75, kind: "pullback", easeIn: EASING.lift },
+  // 12 — Pullback sub-stage C: the final pose — full sky, all four constellations and scaffold visible
+  { progress: 1.00, position: [0, 100, 200],   target: [0, 0, -500],     fov: 85, kind: "pullback", easeIn: EASING.settle },
 ];
+
+/** Sub-stage progress ranges for the Beat 10 reveal (used by overlay + scaffold). */
+export const BEAT10 = {
+  subA: { start: 0.86, end: 0.92 },  // slow recede
+  subB: { start: 0.92, end: 0.97 },  // the lift
+  subC: { start: 0.97, end: 1.00 },  // the final pose
+  /** Simultaneous scaffold draw triggers here, mid-lift. */
+  scaffoldTrigger: 0.94,
+  scaffoldDurationMs: 1800,
+  /** Wall-clock hold once scrollProgress reaches 1.0. */
+  holdAfterArrivalMs: 1200,
+} as const;
 
 /** Roll (Z-axis rotation) applied during transits, in degrees. Alternates sign. */
 export const ROLL = {
