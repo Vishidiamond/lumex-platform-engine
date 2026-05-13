@@ -56,8 +56,6 @@ export const KEYFRAMES: Keyframe[] = [
   { progress: 0.78, position: [-50, 0, -850],  target: [-100, 50, -1000], fov: 65, kind: "transit", easeIn: EASING.transit },
   // 9 — Arrival: House
   { progress: 0.86, position: [-90, 50, -950], target: [-100, 50, -1000], fov: 55, kind: "arrival", easeIn: EASING.arrival },
-  // 9 — Arrival: House
-  { progress: 0.86, position: [-90, 50, -950], target: [-100, 50, -1000], fov: 55, kind: "arrival", easeIn: EASING.arrival },
   // 10 — Pullback sub-stage A: slow recede from House (other constellations creep into peripheral view)
   { progress: 0.92, position: [-40, 80, -400], target: [-100, 50, -1000], fov: 55, kind: "pullback", easeIn: EASING.recede },
   // 11 — Pullback sub-stage B: the lift — camera lifts and rotates upward, lookAt swings to sky-center
@@ -116,13 +114,13 @@ export const PARALLAX = {
  * KEYFRAMES[i] → KEYFRAMES[i+1] is a transit). Destination constellation
  * defines which constellation gets the foreshadowing pulse.
  */
-export const TRANSITS: { segIndex: number; destination: "sphere" | "lattice" | "house"; lateralOffsetPct: number; line: string }[] = [
-  // Segment 3 → 4 (Beat 4 to Sphere)
-  { segIndex: 3, destination: "sphere",  lateralOffsetPct: -8, line: "Underneath every transaction — a layer of intelligence." },
-  // Segment 5 → 6 (Beat 6 to Lattice)
-  { segIndex: 5, destination: "lattice", lateralOffsetPct:  8, line: "Precision is the product." },
-  // Segment 7 → 8 (Beat 8 to House)
-  { segIndex: 7, destination: "house",   lateralOffsetPct: -8, line: "The category moves up the value chain." },
+export const TRANSITS: { segIndex: number; destination: "sphere" | "lattice" | "house"; lateralOffsetPct: number; verticalPct: number; line: string }[] = [
+  // Segment 3 → 4 (Beat 4 to Sphere) — left, slightly above center
+  { segIndex: 3, destination: "sphere",  lateralOffsetPct: -8, verticalPct: 45, line: "Underneath every transaction — a layer of intelligence." },
+  // Segment 5 → 6 (Beat 6 to Lattice) — right, slightly below center
+  { segIndex: 5, destination: "lattice", lateralOffsetPct:  8, verticalPct: 55, line: "Precision is the product." },
+  // Segment 7 → 8 (Beat 8 to House) — centered, high (anticipating House scale)
+  { segIndex: 7, destination: "house",   lateralOffsetPct:  0, verticalPct: 38, line: "The category moves up the value chain." },
 ];
 
 /** Foreshadowing pulse — applied to destination constellation at transit midpoint. */
