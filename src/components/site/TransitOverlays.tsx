@@ -1,0 +1,89 @@
+import { useEffect, useRef, useState } from "react";
+import { scrollStore } from "@/lib/scroll-store";
+import { KEYFRAMES, TRANSITS } from "./camera-config";
+
+/**
+ * Fixed overlay rendering each transit's typography. Reads scroll progress
+ * directly so timing stays locked to the keyframed camera path.
+ *
+ * Per-transit asymmetric placement keeps each transit visually distinct.
+ */
+export function TransitOverlays() {
+  const refs = useRef<(HTMLDivElement | null)[]>([]);
+  const [reduce, setReduce] = useState(false);
+
+  useEffect(() => {
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    setReduce(mq.matches);
+    const onChange = (e: MediaQueryListEvent) => setReduce(e.matches);
+    mq.addEventListener("change", onChange);
+    return () => mq.removeEventListener("change", onChange);
+  }, []);
+
+  useEffect(() => {
+    let raf = 0;
+    const tick = () => {
+      const p = scrollStore.get();
+      TRANSITS.forEach((t, i) => {
+        const el = refs.current[i];
+        if (!el) return;
+        const a = KEYFRAMES[t.segIndex].progress;
+        const b = KEYFRAMES[t.segIndex + 1].progress;
+        const local = (p - a) / Math.max(1e-6, b - a);
+        let alpha = 0;
+        if (local > 0 && local < 1) {
+          // Fade in 0–0.18, hold 0.18–0.72, fade out 0.72–1
+          if (local < 0.18) alpha = local / 0.18;
+          else if (local < 0.72) alpha = 1;
+          else alpha = (1 - local) / 0.28;
+          alpha = Math.max(0, Math.min(1, alpha)) * 0.7;
+        }
+        if (reduce) alpha = local > 0 && local < 1 ? 0.7 : 0;
+        el.style.opacity = alpha.toFixed(3);
+        el.style.visibility = alpha > 0.001 ? "visible" : "hidden";
+      });
+      raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [reduce]);
+
+  return (
+    <div
+      aria-hidden
+      className="pointer-events-none fixed inset-0 z-20 hidden md:block"
+    >
+      {TRANSITS.map((t, i) => {
+        // 8% offset from center
+        const offset = `calc(50% + ${t.lateralOffsetPct}vw)`;
+        return (
+          <div
+            key={t.segIndex}
+            ref={(el) => {
+              refs.current[i] = el;
+            }}
+            className="absolute top-1/2 -translate-y-1/2 px-6"
+            style={{
+              left: offset,
+              transform: `translate(-50%, -50%)`,
+              opacity: 0,
+              visibility: "hidden",
+              willChange: "opacity",
+              transition: "opacity 90ms linear",
+              maxWidth: "min(640px, 70vw)",
+            }}
+          >
+            <p
+              className="text-balance text-center text-xl font-light leading-snug text-white/90 md:text-3xl"
+              style={{
+                textShadow: "0 0 24px rgba(10,18,40,0.55), 0 1px 2px rgba(0,0,0,0.5)",
+              }}
+            >
+              {t.line}
+            </p>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
