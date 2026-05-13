@@ -3,6 +3,7 @@ import { ArrowDown, ArrowUpRight } from "lucide-react";
 import { Starfield } from "@/components/site/Starfield";
 import { Constellation, useInView } from "@/components/site/Constellation";
 import { TransitOverlays } from "@/components/site/TransitOverlays";
+import { FinalPullbackOverlay } from "@/components/site/FinalPullbackOverlay";
 import { AudioToggle } from "@/components/site/AudioToggle";
 import { cn } from "@/lib/utils";
 import type { ReactNode } from "react";
@@ -37,6 +38,7 @@ function Index() {
     <div className="relative bg-[#070b18] text-[#e6ecf7]">
       <Starfield />
       <TransitOverlays />
+      <FinalPullbackOverlay />
       <AudioToggle />
       <Beat0 />
       <Beat1 />
@@ -280,45 +282,16 @@ function BeatArrival({
 }
 
 function Beat10() {
-  const { ref, inView } = useInView<HTMLDivElement>(0.2);
+  // Beat 10 typography is rendered by <FinalPullbackOverlay /> as a fixed,
+  // scroll-progress-driven sequence. This section is a tall scroll spacer
+  // that gives the camera path enough scroll distance for the three-substage
+  // pullback (scrollProgress 0.86 → 1.00 ≈ 14% of the page).
   return (
     <section
-      ref={ref}
+      aria-hidden
       id="full-sky"
-      className="relative flex min-h-screen flex-col items-center justify-center px-6 py-24 text-center"
+      className="relative min-h-[140vh]"
     >
-      <p className="eyebrow !text-white/45">The full sky</p>
-      <div className="mt-10 w-full max-w-5xl">
-        <FullSky active={inView} />
-      </div>
-      <h2
-        className={cn(
-          "mt-12 max-w-3xl text-3xl font-semibold leading-[1.05] tracking-tight text-white transition-all duration-1000 md:text-5xl",
-          inView ? "translate-y-0 opacity-100" : "translate-y-4 opacity-0",
-        )}
-      >
-        Four constellations. One sky.
-      </h2>
-
-      <div className="mt-14 w-full max-w-5xl border-y border-white/10 py-6">
-        <ul
-          className="flex flex-wrap items-center justify-center gap-x-8 gap-y-3 text-xs text-white/70"
-          style={{ letterSpacing: "0.18em", fontFamily: "var(--font-mono)", textTransform: "uppercase" }}
-        >
-          <li>30 patented diamond shapes</li>
-          <li aria-hidden className="text-white/25">·</li>
-          <li>1,000+ proprietary styles</li>
-          <li aria-hidden className="text-white/25">·</li>
-          <li>200+ active clients</li>
-          <li aria-hidden className="text-white/25">·</li>
-          <li>20+ geographies</li>
-        </ul>
-      </div>
-
-      <p className="mt-16 text-sm uppercase text-white/55" style={{ letterSpacing: "0.32em", fontFamily: "var(--font-mono)" }}>
-        Lumex — The Future.
-      </p>
-
       <style>{`
         .ghost-cta {
           display: inline-flex;
