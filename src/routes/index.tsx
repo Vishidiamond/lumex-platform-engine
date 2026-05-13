@@ -1,26 +1,20 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { Section } from "@/components/site/Section";
 
 export const Route = createFileRoute("/")({
   component: Index,
 });
 
-// IMPORTANT: Replace this placeholder. For sites with multiple pages (About, Services, Contact, etc.),
-// create separate route files (about.tsx, services.tsx, contact.tsx) — don't put all pages in this file.
-function PlaceholderIndex() {
-  return (
-    <div
-      className="flex min-h-screen items-center justify-center"
-      style={{ backgroundColor: "#fcfbf8" }}
-    >
-      <img
-        data-lovable-blank-page-placeholder="REMOVE_THIS"
-        src="https://cdn.gpteng.co/blank-app-v1.svg"
-        alt="Your app will live here!"
-      />
-    </div>
-  );
-}
-
 function Index() {
-  return <PlaceholderIndex />;
+  return (
+    <Section eyebrow="Home" bound="wide">
+      <h1 className="max-w-4xl text-4xl font-semibold tracking-tight md:text-6xl">
+        Project shell ready.
+      </h1>
+      <p className="mt-6 max-w-2xl text-lg text-muted-foreground">
+        Navigation, footer, typography system, color tokens, and the reusable
+        Section component are wired. Page content arrives on request.
+      </p>
+    </Section>
+  );
 }
