@@ -2,6 +2,8 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowDown, ArrowUpRight } from "lucide-react";
 import { Starfield } from "@/components/site/Starfield";
 import { Constellation, useInView } from "@/components/site/Constellation";
+import { TransitOverlays } from "@/components/site/TransitOverlays";
+import { AudioToggle } from "@/components/site/AudioToggle";
 import { cn } from "@/lib/utils";
 import type { ReactNode } from "react";
 
@@ -34,6 +36,8 @@ function Index() {
   return (
     <div className="relative bg-[#070b18] text-[#e6ecf7]">
       <Starfield />
+      <TransitOverlays />
+      <AudioToggle />
       <Beat0 />
       <Beat1 />
       <Beat2 />
@@ -188,21 +192,11 @@ function Beat2() {
   );
 }
 
-function BeatTransit({ line }: { line: string }) {
-  const { ref, inView } = useInView<HTMLDivElement>(0.4);
-  return (
-    <section className="relative flex min-h-[60vh] items-center justify-center px-6 text-center">
-      <div
-        ref={ref}
-        className={cn(
-          "max-w-3xl text-balance text-xl font-light leading-snug text-white/70 transition-all duration-1000 md:text-3xl",
-          inView ? "translate-y-0 opacity-100" : "translate-y-4 opacity-0",
-        )}
-      >
-        {line}
-      </div>
-    </section>
-  );
+function BeatTransit({ line: _line }: { line: string }) {
+  // Text is now rendered by <TransitOverlays /> (fixed, scroll-progress driven).
+  // This section remains as a scroll-height spacer so KEYFRAMES stay aligned
+  // to the overall page height.
+  return <section aria-hidden className="relative min-h-[60vh]" />;
 }
 
 interface CtaTo {
