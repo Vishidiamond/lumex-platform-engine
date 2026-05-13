@@ -74,19 +74,21 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lumex — Owned IP. Owned rails. Owned brands." },
+      { title: "Lumex Constellation" },
       {
         name: "description",
         content:
           "Lumex is rebuilding the diamond and jewelry industry from the ground up — owning the AI that designs it, the platform that trades it, and the brands that sell it.",
       },
-      { property: "og:title", content: "Lumex" },
+      { property: "og:site_name", content: "Lumex" },
+      { property: "og:title", content: "Lumex Constellation" },
       {
         property: "og:description",
         content:
           "A technology and platform company rebuilding the diamond and jewelry industry.",
       },
       { property: "og:type", content: "website" },
+      { property: "og:url", content: "https://lumexconstellation.com/" },
       { name: "twitter:card", content: "summary" },
     ],
     links: [
