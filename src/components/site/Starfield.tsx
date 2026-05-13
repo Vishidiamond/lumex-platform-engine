@@ -576,7 +576,7 @@ function Scene({ reduceMotion }: { reduceMotion: boolean }) {
       />
       <NearTierStreaks nearRef={nearRef} />
       <DenseTransitStars />
-      <AllConstellations />
+      <AllConstellationStars />
       <AllConstellationLines reduceMotion={reduceMotion} />
       <ScaffoldLines reduceMotion={reduceMotion} />
       <CameraRig reduceMotion={reduceMotion} tiers={{ near: nearRef, mid: midRef, far: farRef }} />
