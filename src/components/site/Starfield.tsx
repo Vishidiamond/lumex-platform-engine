@@ -25,8 +25,6 @@ import {
   makePose,
   resolvePose,
 } from "./camera-config";
-import {
-
 /* ─────────────── Star tier generation ─────────────── */
 
 const STAR_PALETTE = [
