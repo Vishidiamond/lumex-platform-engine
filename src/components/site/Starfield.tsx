@@ -2,11 +2,17 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";
 import { scrollStore } from "@/lib/scroll-store";
-import { CONSTELLATIONS } from "./constellations3d";
+import { sceneState } from "@/lib/scene-state";
+import { CONSTELLATIONS, CONSTELLATION_BY_ID, type Constellation3D } from "./constellations3d";
 import {
   AMBIENT_DRIFT,
+  DENSE_TRANSIT,
+  FORESHADOW,
   KEYFRAMES,
   PARALLAX,
+  STREAK,
+  TRANSITS,
+  bezier,
   makePose,
   resolvePose,
 } from "./camera-config";
@@ -46,10 +52,7 @@ function makeTierGeometry(count: number, rMin: number, rMax: number) {
     colors[i * 3 + 1] = c.g;
     colors[i * 3 + 2] = c.b;
   }
-  const g = new THREE.BufferGeometry();
-  g.setAttribute("position", new THREE.BufferAttribute(positions, 3));
-  g.setAttribute("color", new THREE.BufferAttribute(colors, 3));
-  return g;
+  return { positions, colors };
 }
 
 interface TierHandle {
@@ -57,12 +60,28 @@ interface TierHandle {
   material: THREE.PointsMaterial | null;
   baseSize: number;
   damp: number;
+  positions?: Float32Array;
 }
 
-function StarTier({ spec, handleRef }: { spec: TierSpec; handleRef: React.MutableRefObject<TierHandle> }) {
+function StarTier({
+  spec,
+  handleRef,
+}: {
+  spec: TierSpec;
+  handleRef: React.MutableRefObject<TierHandle>;
+}) {
   const groupRef = useRef<THREE.Group>(null);
   const matRef = useRef<THREE.PointsMaterial>(null);
-  const geom = useMemo(() => makeTierGeometry(spec.count, spec.rMin, spec.rMax), [spec.count, spec.rMin, spec.rMax]);
+  const data = useMemo(
+    () => makeTierGeometry(spec.count, spec.rMin, spec.rMax),
+    [spec.count, spec.rMin, spec.rMax],
+  );
+  const geom = useMemo(() => {
+    const g = new THREE.BufferGeometry();
+    g.setAttribute("position", new THREE.BufferAttribute(data.positions, 3));
+    g.setAttribute("color", new THREE.BufferAttribute(data.colors, 3));
+    return g;
+  }, [data]);
 
   useEffect(() => {
     handleRef.current = {
@@ -70,8 +89,9 @@ function StarTier({ spec, handleRef }: { spec: TierSpec; handleRef: React.Mutabl
       material: matRef.current,
       baseSize: spec.size,
       damp: spec.parallaxDamp,
+      positions: data.positions,
     };
-  }, [handleRef, spec.size, spec.parallaxDamp]);
+  }, [handleRef, spec.size, spec.parallaxDamp, data.positions]);
 
   return (
     <group ref={groupRef}>
@@ -92,34 +112,231 @@ function StarTier({ spec, handleRef }: { spec: TierSpec; handleRef: React.Mutabl
   );
 }
 
-/* ─────────────── Constellation bright stars ─────────────── */
+/* ─────────────── Per-constellation bright stars (pulsed independently) ─────────────── */
 
-function ConstellationStars() {
+const FORESHADOW_EASE = bezier(FORESHADOW.ease);
+
+function ConstellationPoints({
+  con,
+  baseSize = 4,
+  baseOpacity = 0.85,
+}: {
+  con: Constellation3D;
+  baseSize?: number;
+  baseOpacity?: number;
+}) {
+  const matRef = useRef<THREE.PointsMaterial>(null);
   const geom = useMemo(() => {
-    const all: number[] = [];
-    const cols: number[] = [];
+    const positions = new Float32Array(con.stars.length * 3);
+    const colors = new Float32Array(con.stars.length * 3);
     const c = new THREE.Color("#eaf1ff");
-    CONSTELLATIONS.forEach((con) => {
-      con.stars.forEach((s) => {
-        all.push(s[0], s[1], s[2]);
-        cols.push(c.r, c.g, c.b);
-      });
+    con.stars.forEach((s, i) => {
+      positions[i * 3] = s[0];
+      positions[i * 3 + 1] = s[1];
+      positions[i * 3 + 2] = s[2];
+      colors[i * 3] = c.r;
+      colors[i * 3 + 1] = c.g;
+      colors[i * 3 + 2] = c.b;
     });
     const g = new THREE.BufferGeometry();
-    g.setAttribute("position", new THREE.BufferAttribute(new Float32Array(all), 3));
-    g.setAttribute("color", new THREE.BufferAttribute(new Float32Array(cols), 3));
+    g.setAttribute("position", new THREE.BufferAttribute(positions, 3));
+    g.setAttribute("color", new THREE.BufferAttribute(colors, 3));
     return g;
-  }, []);
+  }, [con]);
+
+  useFrame(() => {
+    const mat = matRef.current;
+    if (!mat) return;
+    // Is this constellation the destination of the currently-playing transit?
+    let pulse = 0;
+    const transit = TRANSITS.find((t) => t.segIndex === sceneState.segIndex);
+    if (transit && transit.destination === con.id) {
+      const t = sceneState.segT;
+      if (t > FORESHADOW.startSegT && t < FORESHADOW.endSegT) {
+        // Triangle wave with bezier ease — peak at peakSegT.
+        const up =
+          (t - FORESHADOW.startSegT) /
+          Math.max(1e-6, FORESHADOW.peakSegT - FORESHADOW.startSegT);
+        const dn =
+          (FORESHADOW.endSegT - t) /
+          Math.max(1e-6, FORESHADOW.endSegT - FORESHADOW.peakSegT);
+        const tri = Math.min(1, Math.max(0, Math.min(up, dn)));
+        pulse = FORESHADOW_EASE(tri);
+      }
+    }
+    const targetSize = baseSize * (1 + FORESHADOW.boost * pulse);
+    const targetOpacity = Math.min(1, baseOpacity * (1 + FORESHADOW.boost * pulse));
+    mat.size += (targetSize - mat.size) * 0.25;
+    mat.opacity += (targetOpacity - mat.opacity) * 0.25;
+  });
 
   return (
     <points frustumCulled={false}>
       <primitive object={geom} attach="geometry" />
       <pointsMaterial
-        size={4}
+        ref={matRef}
+        size={baseSize}
         sizeAttenuation
         vertexColors
         transparent
-        opacity={0.95}
+        opacity={baseOpacity}
+        depthWrite={false}
+        blending={THREE.AdditiveBlending}
+      />
+    </points>
+  );
+}
+
+function AllConstellations() {
+  return (
+    <>
+      {CONSTELLATIONS.map((c) => (
+        <ConstellationPoints key={c.id} con={c} />
+      ))}
+    </>
+  );
+}
+
+/* ─────────────── Near-tier streaks (transit-only) ─────────────── */
+
+function NearTierStreaks({ nearRef }: { nearRef: React.MutableRefObject<TierHandle> }) {
+  const lineRef = useRef<THREE.LineSegments>(null);
+  const matRef = useRef<THREE.LineBasicMaterial>(null);
+
+  // Sample indices into the near tier; static for the lifetime of the scene.
+  const indices = useMemo(() => {
+    const handle = nearRef.current;
+    const total = handle.positions ? handle.positions.length / 3 : 2000;
+    const n = Math.min(STREAK.sampleCount, total);
+    const arr = new Uint32Array(n);
+    for (let i = 0; i < n; i++) arr[i] = Math.floor((i / n) * total);
+    return arr;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Pre-allocated dual-vertex buffer (start = star pos, end = star pos − cameraVel).
+  const positions = useMemo(() => new Float32Array(indices.length * 6), [indices]);
+
+  const geom = useMemo(() => {
+    const g = new THREE.BufferGeometry();
+    g.setAttribute("position", new THREE.BufferAttribute(positions, 3));
+    return g;
+  }, [positions]);
+
+  useFrame(() => {
+    const handle = nearRef.current;
+    const mat = matRef.current;
+    if (!mat || !handle.positions || !handle.group) return;
+
+    const alphaTarget = STREAK.maxAlpha * sceneState.transitness;
+    mat.opacity += (alphaTarget - mat.opacity) * 0.2;
+    mat.visible = mat.opacity > 0.005;
+
+    if (!mat.visible) return;
+
+    // World-space streak vector: opposite of camera velocity.
+    const vx = -sceneState.cameraVel.x * STREAK.velocityScale;
+    const vy = -sceneState.cameraVel.y * STREAK.velocityScale;
+    const vz = -sceneState.cameraVel.z * STREAK.velocityScale;
+    const ox = handle.group.position.x;
+    const oy = handle.group.position.y;
+    const oz = handle.group.position.z;
+
+    const src = handle.positions;
+    for (let i = 0; i < indices.length; i++) {
+      const idx = indices[i] * 3;
+      const wx = src[idx] + ox;
+      const wy = src[idx + 1] + oy;
+      const wz = src[idx + 2] + oz;
+      const out = i * 6;
+      positions[out] = wx;
+      positions[out + 1] = wy;
+      positions[out + 2] = wz;
+      positions[out + 3] = wx + vx;
+      positions[out + 4] = wy + vy;
+      positions[out + 5] = wz + vz;
+    }
+    geom.attributes.position.needsUpdate = true;
+  });
+
+  return (
+    <lineSegments ref={lineRef}>
+      <primitive object={geom} attach="geometry" />
+      <lineBasicMaterial
+        ref={matRef}
+        color="#dfe9ff"
+        transparent
+        opacity={0}
+        depthWrite={false}
+        blending={THREE.AdditiveBlending}
+      />
+    </lineSegments>
+  );
+}
+
+/* ─────────────── Dense transit stars (Beat 8 → House) ─────────────── */
+
+function DenseTransitStars() {
+  const matRef = useRef<THREE.PointsMaterial>(null);
+
+  const geom = useMemo(() => {
+    // Seed along the path between Beat 7 (segIndex 7 start) and Beat 9 (segIndex 7 end).
+    const a = new THREE.Vector3(...KEYFRAMES[DENSE_TRANSIT.segIndex].position);
+    const b = new THREE.Vector3(...KEYFRAMES[DENSE_TRANSIT.segIndex + 1].position);
+    const dir = new THREE.Vector3().subVectors(b, a).normalize();
+    // Build an orthonormal basis perpendicular to the path.
+    const up = new THREE.Vector3(0, 1, 0);
+    const right = new THREE.Vector3().crossVectors(dir, up).normalize();
+    const upN = new THREE.Vector3().crossVectors(right, dir).normalize();
+    const positions = new Float32Array(DENSE_TRANSIT.count * 3);
+    const colors = new Float32Array(DENSE_TRANSIT.count * 3);
+    const palette = STAR_PALETTE;
+    for (let i = 0; i < DENSE_TRANSIT.count; i++) {
+      const tt = Math.random();
+      const r = Math.sqrt(Math.random()) * DENSE_TRANSIT.radius;
+      const ang = Math.random() * Math.PI * 2;
+      const px = a.x + (b.x - a.x) * tt + right.x * Math.cos(ang) * r + upN.x * Math.sin(ang) * r;
+      const py = a.y + (b.y - a.y) * tt + right.y * Math.cos(ang) * r + upN.y * Math.sin(ang) * r;
+      const pz = a.z + (b.z - a.z) * tt + right.z * Math.cos(ang) * r + upN.z * Math.sin(ang) * r;
+      positions[i * 3] = px;
+      positions[i * 3 + 1] = py;
+      positions[i * 3 + 2] = pz;
+      const c = palette[i % palette.length];
+      colors[i * 3] = c.r;
+      colors[i * 3 + 1] = c.g;
+      colors[i * 3 + 2] = c.b;
+    }
+    const g = new THREE.BufferGeometry();
+    g.setAttribute("position", new THREE.BufferAttribute(positions, 3));
+    g.setAttribute("color", new THREE.BufferAttribute(colors, 3));
+    return g;
+  }, []);
+
+  useFrame(() => {
+    const mat = matRef.current;
+    if (!mat) return;
+    let target = 0;
+    if (sceneState.segIndex === DENSE_TRANSIT.segIndex) {
+      // Fade in as we enter, sustain through middle, fade as House resolves
+      const t = sceneState.segT;
+      const fadeIn = Math.min(1, t / 0.15);
+      const fadeOut = Math.min(1, (1 - t) / 0.18);
+      target = 0.95 * Math.min(fadeIn, fadeOut);
+    }
+    mat.opacity += (target - mat.opacity) * 0.18;
+    mat.visible = mat.opacity > 0.005;
+  });
+
+  return (
+    <points frustumCulled={false}>
+      <primitive object={geom} attach="geometry" />
+      <pointsMaterial
+        ref={matRef}
+        size={1.7}
+        sizeAttenuation
+        vertexColors
+        transparent
+        opacity={0}
         depthWrite={false}
         blending={THREE.AdditiveBlending}
       />
@@ -134,52 +351,55 @@ function CameraRig({
   tiers,
 }: {
   reduceMotion: boolean;
-  tiers: { near: React.MutableRefObject<TierHandle>; mid: React.MutableRefObject<TierHandle>; far: React.MutableRefObject<TierHandle> };
+  tiers: {
+    near: React.MutableRefObject<TierHandle>;
+    mid: React.MutableRefObject<TierHandle>;
+    far: React.MutableRefObject<TierHandle>;
+  };
 }) {
   const { camera, clock } = useThree();
   const pose = useRef(makePose());
   const tmpLook = useRef(new THREE.Vector3());
   const tmpPos = useRef(new THREE.Vector3());
   const driftedPos = useRef(new THREE.Vector3());
+  const prevCamPos = useRef(new THREE.Vector3());
+  const prevTime = useRef(0);
 
   const persp = camera as THREE.PerspectiveCamera;
 
   useFrame(() => {
+    const now = clock.getElapsedTime();
+    const dt = Math.max(1 / 240, now - prevTime.current);
+    prevTime.current = now;
+
     const p = scrollStore.get();
     const r = resolvePose(p, pose.current);
 
-    // ambient drift (skip under reduced motion)
     let dx = 0;
     let dy = 0;
     if (!reduceMotion) {
-      const t = clock.getElapsedTime();
       const w = (Math.PI * 2) / AMBIENT_DRIFT.periodSec;
-      dx = Math.sin(t * w) * AMBIENT_DRIFT.ampX;
-      dy = Math.cos(t * w * 0.85) * AMBIENT_DRIFT.ampY;
+      dx = Math.sin(now * w) * AMBIENT_DRIFT.ampX;
+      dy = Math.cos(now * w * 0.85) * AMBIENT_DRIFT.ampY;
     }
 
     driftedPos.current.set(r.position.x + dx, r.position.y + dy, r.position.z);
     tmpLook.current.copy(r.target);
 
-    // Hold camera position (no easing toward target — pose is already eased)
     persp.position.copy(driftedPos.current);
-
-    // Smooth re-targeting: lookAt every frame, target itself is interpolated
     persp.up.set(0, 1, 0);
     persp.lookAt(tmpLook.current);
 
-    // Apply roll on Z after lookAt
     if (Math.abs(r.rollDeg) > 1e-4 && !reduceMotion) {
       persp.rotateZ((r.rollDeg * Math.PI) / 180);
     }
 
-    // FOV
     if (Math.abs(persp.fov - r.fov) > 1e-3) {
       persp.fov = r.fov;
       persp.updateProjectionMatrix();
     }
 
-    // Parallax-dampened star tiers — far tier follows camera (sky dome feel)
+    // Parallax-dampened tiers
     for (const ref of [tiers.near, tiers.mid, tiers.far]) {
       const h = ref.current;
       if (!h.group) continue;
@@ -187,29 +407,41 @@ function CameraRig({
       h.group.position.copy(tmpPos.current);
     }
 
-    // Near-tier size boost during transits — motion-blur suggestion
     const nearMat = tiers.near.current.material;
     const nearBase = tiers.near.current.baseSize;
     if (nearMat) {
       const target = nearBase * (1 + PARALLAX.nearTransitSizeBoost * r.transitness);
-      // small lerp so size changes feel organic
       nearMat.size += (target - nearMat.size) * 0.18;
     }
+
+    // Camera velocity (units / sec)
+    sceneState.cameraVel
+      .copy(driftedPos.current)
+      .sub(prevCamPos.current)
+      .divideScalar(dt);
+    prevCamPos.current.copy(driftedPos.current);
+    sceneState.cameraPos.copy(driftedPos.current);
+    sceneState.speed += (sceneState.cameraVel.length() - sceneState.speed) * 0.2;
+    sceneState.transitness = r.transitness;
+    sceneState.arrivalness = r.arrivalness;
+    sceneState.segIndex = r.segIndex;
+    sceneState.segT = r.segT;
+    sceneState.reduceMotion = reduceMotion;
   });
 
-  // Set initial camera state once
   useEffect(() => {
     const r = resolvePose(0, pose.current);
     persp.position.copy(r.position);
     persp.lookAt(r.target);
     persp.fov = r.fov;
     persp.updateProjectionMatrix();
+    prevCamPos.current.copy(persp.position);
   }, [persp]);
 
   return null;
 }
 
-/* ─────────────── Sky scaffolding (visible only at full pullback, Beat 10) ─────────────── */
+/* ─────────────── Sky scaffolding (visible only at full pullback) ─────────────── */
 
 function FullSkyScaffolding() {
   const ref = useRef<THREE.LineSegments>(null);
@@ -230,11 +462,10 @@ function FullSkyScaffolding() {
 
   useFrame(() => {
     const p = scrollStore.get();
-    // fade in only on the final pullback segment (between Beat 9 → Beat 10)
     const start = KEYFRAMES[KEYFRAMES.length - 2].progress;
     const end = KEYFRAMES[KEYFRAMES.length - 1].progress;
     const local = Math.min(1, Math.max(0, (p - start) / Math.max(1e-6, end - start)));
-    const o = local * local * 0.45; // ease-in, max 0.45 alpha
+    const o = local * local * 0.45;
     const mat = ref.current?.material as THREE.LineBasicMaterial | undefined;
     if (mat && Math.abs(mat.opacity - o) > 1e-3) {
       mat.opacity = o;
@@ -277,7 +508,9 @@ function Scene({ reduceMotion }: { reduceMotion: boolean }) {
         handleRef={nearRef}
         spec={{ count: 2000, rMin: 100, rMax: 300, size: 1.6, opacity: 0.95, parallaxDamp: PARALLAX.near }}
       />
-      <ConstellationStars />
+      <NearTierStreaks nearRef={nearRef} />
+      <DenseTransitStars />
+      <AllConstellations />
       <FullSkyScaffolding />
       <CameraRig reduceMotion={reduceMotion} tiers={{ near: nearRef, mid: midRef, far: farRef }} />
     </>
@@ -321,3 +554,6 @@ export function Starfield() {
     </div>
   );
 }
+
+// Keep export for downstream use
+export { CONSTELLATION_BY_ID };

@@ -90,6 +90,51 @@ export const PARALLAX = {
   nearTransitSizeBoost: 0.15,
 };
 
+/**
+ * Transit beats — segment indices (i.e. the index `i` such that the segment
+ * KEYFRAMES[i] → KEYFRAMES[i+1] is a transit). Destination constellation
+ * defines which constellation gets the foreshadowing pulse.
+ */
+export const TRANSITS: { segIndex: number; destination: "sphere" | "lattice" | "house"; lateralOffsetPct: number; line: string }[] = [
+  // Segment 3 → 4 (Beat 4 to Sphere)
+  { segIndex: 3, destination: "sphere",  lateralOffsetPct: -8, line: "Underneath every transaction — a layer of intelligence." },
+  // Segment 5 → 6 (Beat 6 to Lattice)
+  { segIndex: 5, destination: "lattice", lateralOffsetPct:  8, line: "Precision is the product." },
+  // Segment 7 → 8 (Beat 8 to House)
+  { segIndex: 7, destination: "house",   lateralOffsetPct: -8, line: "The category moves up the value chain." },
+];
+
+/** Foreshadowing pulse — applied to destination constellation at transit midpoint. */
+export const FORESHADOW = {
+  /** Luminosity boost (size + opacity multiplier) at peak. */
+  boost: 0.4,
+  /** Window inside segT where the pulse exists (start, peak, end). */
+  startSegT: 0.30,
+  peakSegT: 0.55,
+  endSegT: 0.78,
+  ease: [0.2, 0.8, 0.4, 1] as Bezier,
+};
+
+/** Star streak (only during transits). */
+export const STREAK = {
+  /** Number of near-tier stars sampled for streaking (perf cap). */
+  sampleCount: 800,
+  /** Streak length is camera-velocity * this scalar. */
+  velocityScale: 0.45,
+  /** Maximum streak alpha. */
+  maxAlpha: 0.55,
+};
+
+/** Dense transit stars seeded along the path between Beat 7 → Beat 9. */
+export const DENSE_TRANSIT = {
+  /** Which transit (segIndex) gets the density boost. */
+  segIndex: 7,
+  count: 1500,
+  /** Cylinder radius around the path. */
+  radius: 220,
+};
+
+
 /** Cubic-bezier solver — Newton's method, sufficient for animation curves. */
 export function bezier([x1, y1, x2, y2]: Bezier): (x: number) => number {
   const cx = 3 * x1;
