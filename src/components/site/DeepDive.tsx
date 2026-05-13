@@ -20,14 +20,14 @@ export interface Division {
   num: string; // "01"
   name: string; // "Rails"
   divisionLabel: string; // "Platform"
-  to: "/platform" | "/technology" | "/diamonds" | "/brands";
+  to: "/platform" | "/technology" | "/diamonds" | "/house";
 }
 
 export const DIVISIONS: Division[] = [
   { id: "rails", num: "01", name: "Rails", divisionLabel: "Platform", to: "/platform" },
   { id: "sphere", num: "02", name: "Sphere", divisionLabel: "Technology", to: "/technology" },
   { id: "lattice", num: "03", name: "Lattice", divisionLabel: "Diamonds", to: "/diamonds" },
-  { id: "house", num: "04", name: "House", divisionLabel: "Brands", to: "/brands" },
+  { id: "house", num: "04", name: "House", divisionLabel: "Brands", to: "/house" },
 ];
 
 /* ─────────── Per-page pulse context ─────────── */

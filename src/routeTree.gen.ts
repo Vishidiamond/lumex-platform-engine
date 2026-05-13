@@ -12,10 +12,9 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as TechnologyRouteImport } from './routes/technology'
 import { Route as PressRouteImport } from './routes/press'
 import { Route as PlatformRouteImport } from './routes/platform'
-import { Route as JewelryRouteImport } from './routes/jewelry'
+import { Route as HouseRouteImport } from './routes/house'
 import { Route as DiamondsRouteImport } from './routes/diamonds'
 import { Route as ContactRouteImport } from './routes/contact'
-import { Route as BrandsRouteImport } from './routes/brands'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
 
@@ -34,9 +33,9 @@ const PlatformRoute = PlatformRouteImport.update({
   path: '/platform',
   getParentRoute: () => rootRouteImport,
 } as any)
-const JewelryRoute = JewelryRouteImport.update({
-  id: '/jewelry',
-  path: '/jewelry',
+const HouseRoute = HouseRouteImport.update({
+  id: '/house',
+  path: '/house',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DiamondsRoute = DiamondsRouteImport.update({
@@ -47,11 +46,6 @@ const DiamondsRoute = DiamondsRouteImport.update({
 const ContactRoute = ContactRouteImport.update({
   id: '/contact',
   path: '/contact',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const BrandsRoute = BrandsRouteImport.update({
-  id: '/brands',
-  path: '/brands',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AboutRoute = AboutRouteImport.update({
@@ -68,10 +62,9 @@ const IndexRoute = IndexRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
-  '/brands': typeof BrandsRoute
   '/contact': typeof ContactRoute
   '/diamonds': typeof DiamondsRoute
-  '/jewelry': typeof JewelryRoute
+  '/house': typeof HouseRoute
   '/platform': typeof PlatformRoute
   '/press': typeof PressRoute
   '/technology': typeof TechnologyRoute
@@ -79,10 +72,9 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
-  '/brands': typeof BrandsRoute
   '/contact': typeof ContactRoute
   '/diamonds': typeof DiamondsRoute
-  '/jewelry': typeof JewelryRoute
+  '/house': typeof HouseRoute
   '/platform': typeof PlatformRoute
   '/press': typeof PressRoute
   '/technology': typeof TechnologyRoute
@@ -91,10 +83,9 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
-  '/brands': typeof BrandsRoute
   '/contact': typeof ContactRoute
   '/diamonds': typeof DiamondsRoute
-  '/jewelry': typeof JewelryRoute
+  '/house': typeof HouseRoute
   '/platform': typeof PlatformRoute
   '/press': typeof PressRoute
   '/technology': typeof TechnologyRoute
@@ -104,10 +95,9 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/about'
-    | '/brands'
     | '/contact'
     | '/diamonds'
-    | '/jewelry'
+    | '/house'
     | '/platform'
     | '/press'
     | '/technology'
@@ -115,10 +105,9 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/about'
-    | '/brands'
     | '/contact'
     | '/diamonds'
-    | '/jewelry'
+    | '/house'
     | '/platform'
     | '/press'
     | '/technology'
@@ -126,10 +115,9 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/about'
-    | '/brands'
     | '/contact'
     | '/diamonds'
-    | '/jewelry'
+    | '/house'
     | '/platform'
     | '/press'
     | '/technology'
@@ -138,10 +126,9 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
-  BrandsRoute: typeof BrandsRoute
   ContactRoute: typeof ContactRoute
   DiamondsRoute: typeof DiamondsRoute
-  JewelryRoute: typeof JewelryRoute
+  HouseRoute: typeof HouseRoute
   PlatformRoute: typeof PlatformRoute
   PressRoute: typeof PressRoute
   TechnologyRoute: typeof TechnologyRoute
@@ -170,11 +157,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PlatformRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/jewelry': {
-      id: '/jewelry'
-      path: '/jewelry'
-      fullPath: '/jewelry'
-      preLoaderRoute: typeof JewelryRouteImport
+    '/house': {
+      id: '/house'
+      path: '/house'
+      fullPath: '/house'
+      preLoaderRoute: typeof HouseRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/diamonds': {
@@ -189,13 +176,6 @@ declare module '@tanstack/react-router' {
       path: '/contact'
       fullPath: '/contact'
       preLoaderRoute: typeof ContactRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/brands': {
-      id: '/brands'
-      path: '/brands'
-      fullPath: '/brands'
-      preLoaderRoute: typeof BrandsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/about': {
@@ -218,10 +198,9 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
-  BrandsRoute: BrandsRoute,
   ContactRoute: ContactRoute,
   DiamondsRoute: DiamondsRoute,
-  JewelryRoute: JewelryRoute,
+  HouseRoute: HouseRoute,
   PlatformRoute: PlatformRoute,
   PressRoute: PressRoute,
   TechnologyRoute: TechnologyRoute,

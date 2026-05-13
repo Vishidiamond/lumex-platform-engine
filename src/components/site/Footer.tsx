@@ -13,8 +13,7 @@ const COLUMNS = [
     title: "Divisions",
     links: [
       { to: "/diamonds", label: "Loose Diamonds" },
-      { to: "/jewelry", label: "Jewelry" },
-      { to: "/brands", label: "Brands" },
+      { to: "/house", label: "Jewelry & Brands" },
       { to: "/technology", label: "AI & Technology" },
     ],
   },

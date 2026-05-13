@@ -86,7 +86,7 @@ function Index() {
         subhead="Atelier Amara. Fortunoff. The next acquisition. The engineering, technology, and capital backbone is shared."
         body={<BrandsRow />}
         closer="Owned IP. Owned rails. Owned brands."
-        secondaryCta={{ label: "Explore the brands", to: "/brands" }}
+        secondaryCta={{ label: "Explore the brands", to: "/house" }}
       />
       <Beat10 />
     </div>
@@ -289,6 +289,7 @@ function Beat10() {
   return (
     <section
       ref={ref}
+      id="full-sky"
       className="relative flex min-h-screen flex-col items-center justify-center px-6 py-24 text-center"
     >
       <p className="eyebrow !text-white/45">The full sky</p>
