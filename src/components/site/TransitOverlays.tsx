@@ -54,17 +54,18 @@ export function TransitOverlays() {
       className="pointer-events-none fixed inset-0 z-20 hidden md:block"
     >
       {TRANSITS.map((t, i) => {
-        // 8% offset from center
-        const offset = `calc(50% + ${t.lateralOffsetPct}vw)`;
+        const left = `calc(50% + ${t.lateralOffsetPct}vw)`;
+        const top = `${t.verticalPct}%`;
         return (
           <div
             key={t.segIndex}
             ref={(el) => {
               refs.current[i] = el;
             }}
-            className="absolute top-1/2 -translate-y-1/2 px-6"
+            className="absolute px-6"
             style={{
-              left: offset,
+              left,
+              top,
               transform: `translate(-50%, -50%)`,
               opacity: 0,
               visibility: "hidden",
