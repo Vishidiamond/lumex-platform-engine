@@ -31,14 +31,16 @@ export function TransitOverlays() {
         const b = KEYFRAMES[t.segIndex + 1].progress;
         const local = (p - a) / Math.max(1e-6, b - a);
         let alpha = 0;
-        if (local > 0 && local < 1) {
-          // Fade in 0–0.18, hold 0.18–0.72, fade out 0.72–1
-          if (local < 0.18) alpha = local / 0.18;
-          else if (local < 0.72) alpha = 1;
-          else alpha = (1 - local) / 0.28;
-          alpha = Math.max(0, Math.min(1, alpha)) * 0.7;
+        // Tightened window so transit copy clears well before the next
+        // section's text/arrival type appears. Fade in 0.05–0.20,
+        // hold 0.20–0.55, fade out 0.55–0.72; fully hidden by 0.72.
+        if (local > 0.05 && local < 0.72) {
+          if (local < 0.20) alpha = (local - 0.05) / 0.15;
+          else if (local < 0.55) alpha = 1;
+          else alpha = (0.72 - local) / 0.17;
+          alpha = Math.max(0, Math.min(1, alpha)) * 0.85;
         }
-        if (reduce) alpha = local > 0 && local < 1 ? 0.7 : 0;
+        if (reduce) alpha = local > 0.05 && local < 0.72 ? 0.85 : 0;
         el.style.opacity = alpha.toFixed(3);
         el.style.visibility = alpha > 0.001 ? "visible" : "hidden";
       });
