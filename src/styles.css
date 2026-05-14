@@ -45,6 +45,9 @@
   --color-navy: var(--navy);
   --color-navy-deep: var(--navy-deep);
   --color-ice: var(--ice);
+  --color-sky: var(--sky);
+  --color-sky-mid: var(--sky-mid);
+  --color-navy-mid: var(--navy-mid);
   --color-steel: var(--steel);
   --color-grid: var(--grid);
 
