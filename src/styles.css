@@ -97,9 +97,12 @@
   /* Lumex brand tokens */
   --navy: #24629b;          /* Pantone 647C — deep brand blue */
   --navy-deep: #1a2740;     /* darker navy surface (derived) */
-  --ice: #a7d0e2;           /* Pantone 7458C 60% — ice tint */
+  --ice: #eef5fa;           /* soft tint of 7458C 60% over white — section surface */
+  --sky: #a7d0e2;           /* Pantone 7458C 60% — true brand ice tint */
+  --sky-mid: #72b2d4;       /* Pantone 7458C — soft brand sky */
+  --navy-mid: #3c7aaa;      /* Pantone 647C 86% — mid brand blue */
   --steel: #888b95;         /* Pantone Cool Gray 8C */
-  --grid: #dbe6ef;          /* hairline grid (derived from ice) */
+  --grid: #dbe6ef;          /* hairline grid (derived) */
 }
 
 .dark {
