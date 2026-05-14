@@ -64,7 +64,7 @@ export function TransitOverlays() {
             ref={(el) => {
               refs.current[i] = el;
             }}
-            className="absolute px-6"
+            className="absolute px-8 py-5 rounded-2xl"
             style={{
               left,
               top,
@@ -74,12 +74,17 @@ export function TransitOverlays() {
               willChange: "opacity",
               transition: "opacity 90ms linear",
               maxWidth: "min(640px, 70vw)",
+              background:
+                "radial-gradient(ellipse at center, rgba(6,12,28,0.78) 0%, rgba(6,12,28,0.55) 55%, rgba(6,12,28,0) 100%)",
+              backdropFilter: "blur(6px)",
+              WebkitBackdropFilter: "blur(6px)",
             }}
           >
             <p
-              className="text-balance text-center text-xl font-light leading-snug text-white/90 md:text-3xl"
+              className="text-balance text-center text-xl font-light leading-snug text-white md:text-3xl"
               style={{
-                textShadow: "0 0 24px rgba(10,18,40,0.55), 0 1px 2px rgba(0,0,0,0.5)",
+                textShadow:
+                  "0 0 28px rgba(6,12,28,0.9), 0 2px 6px rgba(0,0,0,0.7)",
               }}
             >
               {t.line}
