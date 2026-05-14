@@ -31,16 +31,14 @@ export function TransitOverlays() {
         const b = KEYFRAMES[t.segIndex + 1].progress;
         const local = (p - a) / Math.max(1e-6, b - a);
         let alpha = 0;
-        // Tightened window so transit copy clears well before the next
-        // section's text/arrival type appears. Fade in 0.05–0.20,
-        // hold 0.20–0.55, fade out 0.55–0.72; fully hidden by 0.72.
-        if (local > 0.05 && local < 0.72) {
-          if (local < 0.20) alpha = (local - 0.05) / 0.15;
-          else if (local < 0.55) alpha = 1;
-          else alpha = (0.72 - local) / 0.17;
-          alpha = Math.max(0, Math.min(1, alpha)) * 0.85;
+        if (local > 0 && local < 1) {
+          // Fade in 0–0.18, hold 0.18–0.72, fade out 0.72–1
+          if (local < 0.18) alpha = local / 0.18;
+          else if (local < 0.72) alpha = 1;
+          else alpha = (1 - local) / 0.28;
+          alpha = Math.max(0, Math.min(1, alpha)) * 0.7;
         }
-        if (reduce) alpha = local > 0.05 && local < 0.72 ? 0.85 : 0;
+        if (reduce) alpha = local > 0 && local < 1 ? 0.7 : 0;
         el.style.opacity = alpha.toFixed(3);
         el.style.visibility = alpha > 0.001 ? "visible" : "hidden";
       });
@@ -64,7 +62,7 @@ export function TransitOverlays() {
             ref={(el) => {
               refs.current[i] = el;
             }}
-            className="absolute px-8 py-5 rounded-2xl"
+            className="absolute px-6"
             style={{
               left,
               top,
@@ -74,17 +72,12 @@ export function TransitOverlays() {
               willChange: "opacity",
               transition: "opacity 90ms linear",
               maxWidth: "min(640px, 70vw)",
-              background:
-                "radial-gradient(ellipse at center, rgba(6,12,28,0.78) 0%, rgba(6,12,28,0.55) 55%, rgba(6,12,28,0) 100%)",
-              backdropFilter: "blur(6px)",
-              WebkitBackdropFilter: "blur(6px)",
             }}
           >
             <p
-              className="text-balance text-center text-xl font-light leading-snug text-white md:text-3xl"
+              className="text-balance text-center text-xl font-light leading-snug text-white/90 md:text-3xl"
               style={{
-                textShadow:
-                  "0 0 28px rgba(6,12,28,0.9), 0 2px 6px rgba(0,0,0,0.7)",
+                textShadow: "0 0 24px rgba(10,18,40,0.55), 0 1px 2px rgba(0,0,0,0.5)",
               }}
             >
               {t.line}
