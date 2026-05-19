@@ -16,6 +16,8 @@ import RouteFocusBridge from "@/galaxy/RouteFocusBridge";
 import { DrawerOutlet } from "@/components/site/DrawerOutlet";
 import BrandedLoader from "@/components/site/BrandedLoader";
 import InteractionHint from "@/components/site/InteractionHint";
+import MobileHome from "@/components/site/MobileHome";
+import { useIsNarrow } from "@/hooks/use-is-narrow";
 
 function NotFoundComponent() {
   return (
@@ -126,6 +128,11 @@ function RootShell({ children }: { children: React.ReactNode }) {
   );
 }
 
+function GalaxyOrMobile() {
+  const isNarrow = useIsNarrow(640);
+  return isNarrow ? <MobileHome /> : <Galaxy />;
+}
+
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
 
@@ -133,7 +140,7 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       
       <ClientOnly fallback={null}>
-        <Galaxy />
+        <GalaxyOrMobile />
       </ClientOnly>
       <ClientOnly fallback={null}>
         <BrandedLoader />
