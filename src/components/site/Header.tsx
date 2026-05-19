@@ -1,88 +1,145 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { Menu, X } from "lucide-react";
-import { cn } from "@/lib/utils";
-import lumexLogo from "@/assets/lumex-logo.png";
+import { CONSTELLATIONS } from "@/galaxy/constellations";
+import { useGalaxyStore } from "@/galaxy/galaxyStore";
 
-const NAV = [
-  { to: "/platform", label: "Platform" },
-  { to: "/technology", label: "Technology" },
-  { to: "/diamonds", label: "Diamonds" },
-  { to: "/house", label: "House" },
-  { to: "/about", label: "About" },
-  { to: "/press", label: "Press" },
-] as const;
+const MOBILE_BREAKPOINT = 780;
 
 export function Header() {
   const [open, setOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Track viewport width; auto-close mobile menu above breakpoint.
+  useEffect(() => {
+    const check = () => {
+      const mobile = window.innerWidth < MOBILE_BREAKPOINT;
+      setIsMobile(mobile);
+      if (!mobile) setOpen(false);
+    };
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
+  }, []);
+
+  // Escape closes mobile menu.
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpen(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [open]);
+
+  const handleLinkClick = (id: (typeof CONSTELLATIONS)[number]["id"]) => {
+    useGalaxyStore.getState().setFocus(id);
+    setOpen(false);
+  };
 
   return (
-    <header className="sticky top-0 z-50 border-b border-border/60 bg-background/85 backdrop-blur supports-[backdrop-filter]:bg-background/70">
-      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6 md:px-10">
-        <Link to="/" className="flex items-center gap-2" onClick={() => setOpen(false)} aria-label="Lumex — Home">
-          <img src={lumexLogo} alt="Lumex" className="h-8 w-auto" />
-        </Link>
-
-        <nav className="hidden items-center gap-8 md:flex">
-          {NAV.map((item) => (
-            <Link
-              key={item.to}
-              to={item.to}
-              className="text-sm text-muted-foreground transition-colors hover:text-foreground"
-              activeProps={{ className: "text-foreground" }}
-            >
-              {item.label}
-            </Link>
-          ))}
-        </nav>
-
-        <div className="hidden md:block">
-          <Link
-            to="/contact"
-            className="inline-flex items-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
-          >
-            Contact
-          </Link>
-        </div>
-
-        <button
-          type="button"
-          className="inline-flex h-10 w-10 items-center justify-center rounded-md text-foreground md:hidden"
-          aria-label="Toggle navigation"
-          aria-expanded={open}
-          onClick={() => setOpen((v) => !v)}
-        >
-          {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-        </button>
-      </div>
-
+    <header
+      style={{
+        position: "fixed",
+        top: 18,
+        left: "50%",
+        transform: "translateX(-50%)",
+        zIndex: 50,
+        pointerEvents: "auto",
+      }}
+    >
+      {/* Pill container */}
       <div
-        className={cn(
-          "border-t border-border/60 md:hidden",
-          open ? "block" : "hidden",
-        )}
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 24,
+          height: 72,
+          padding: "0 24px",
+          borderRadius: 14,
+          background: "rgba(255, 255, 255, 0.08)",
+          border: "1px solid rgba(255, 255, 255, 0.12)",
+          backdropFilter: "blur(10px)",
+          WebkitBackdropFilter: "blur(10px)",
+        }}
       >
-        <nav className="mx-auto flex max-w-7xl flex-col gap-1 px-6 py-4">
-          {NAV.map((item) => (
+        {!isMobile &&
+          CONSTELLATIONS.map((c) => (
             <Link
-              key={item.to}
-              to={item.to}
-              onClick={() => setOpen(false)}
-              className="rounded-md px-2 py-2 text-sm text-muted-foreground hover:bg-muted hover:text-foreground"
-              activeProps={{ className: "text-foreground bg-muted" }}
+              key={c.id}
+              to={c.route}
+              onClick={() => handleLinkClick(c.id)}
+              style={{
+                color: "rgba(255, 255, 255, 0.9)",
+                fontSize: 14,
+                textDecoration: "none",
+                letterSpacing: "0.02em",
+                opacity: 0.7,
+                transition: "opacity 200ms",
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.opacity = "1")}
+              onMouseLeave={(e) => (e.currentTarget.style.opacity = "0.7")}
+              activeProps={{ style: { opacity: 1 } }}
             >
-              {item.label}
+              {c.name}
             </Link>
           ))}
-          <Link
-            to="/contact"
-            onClick={() => setOpen(false)}
-            className="mt-2 inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground"
+
+        {isMobile && (
+          <button
+            type="button"
+            aria-label="Toggle navigation"
+            aria-expanded={open}
+            onClick={() => setOpen((v) => !v)}
+            style={{
+              background: "transparent",
+              border: "none",
+              color: "rgba(255, 255, 255, 0.9)",
+              fontSize: 22,
+              cursor: "pointer",
+              padding: "0 8px",
+              lineHeight: 1,
+            }}
           >
-            Contact
-          </Link>
-        </nav>
+            ☰
+          </button>
+        )}
       </div>
+
+      {/* Mobile drawer */}
+      {isMobile && open && (
+        <nav
+          style={{
+            marginTop: 8,
+            display: "flex",
+            flexDirection: "column",
+            gap: 4,
+            padding: "12px 16px",
+            borderRadius: 14,
+            background: "rgba(255, 255, 255, 0.08)",
+            border: "1px solid rgba(255, 255, 255, 0.12)",
+            backdropFilter: "blur(10px)",
+            WebkitBackdropFilter: "blur(10px)",
+          }}
+        >
+          {CONSTELLATIONS.map((c) => (
+            <Link
+              key={c.id}
+              to={c.route}
+              onClick={() => handleLinkClick(c.id)}
+              style={{
+                color: "rgba(255, 255, 255, 0.9)",
+                fontSize: 14,
+                textDecoration: "none",
+                letterSpacing: "0.02em",
+                padding: "10px 8px",
+              }}
+              activeProps={{ style: { opacity: 1 } }}
+            >
+              {c.name}
+            </Link>
+          ))}
+        </nav>
+      )}
     </header>
   );
 }
