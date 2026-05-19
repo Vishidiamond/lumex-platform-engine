@@ -10,7 +10,7 @@ import {
 
 import appCss from "../styles.css?url";
 import { Header } from "@/components/site/Header";
-import { LenisProvider } from "@/components/site/LenisProvider";
+
 import Galaxy from "@/components/galaxy/Galaxy";
 import RouteFocusBridge from "@/galaxy/RouteFocusBridge";
 import { DrawerOutlet } from "@/components/site/DrawerOutlet";
@@ -129,7 +129,7 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <LenisProvider />
+      
       <ClientOnly fallback={null}>
         <Galaxy />
       </ClientOnly>
