@@ -7,14 +7,18 @@ export const Route = createFileRoute("/lumex-online")({
   component: LumexOnlinePage,
   head: () => ({
     meta: [
-      { title: "Lumex.Online — Lumex" },
+      { title: "Lumex.Online — The rails of the trade | Lumex" },
       {
         name: "description",
         content:
-          "Lumex.online connects the diamond industry — brokers, banks, and logistics — on a single set of rails.",
+          "Not a marketplace. Not a website. Infrastructure. Lumex.Online is the layer the diamond category will run on.",
       },
-      { property: "og:title", content: "Lumex.Online — Lumex" },
-      { property: "og:description", content: "The platform the trade now runs on." },
+      { property: "og:title", content: "Lumex.Online — The rails of the trade | Lumex" },
+      {
+        property: "og:description",
+        content:
+          "Not a marketplace. Not a website. Infrastructure. Lumex.Online is the layer the diamond category will run on.",
+      },
       { property: "og:type", content: "website" },
       { property: "og:url", content: `${SITE}/lumex-online` },
     ],
