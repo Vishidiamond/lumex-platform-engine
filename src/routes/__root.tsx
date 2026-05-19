@@ -15,6 +15,7 @@ import Galaxy from "@/components/galaxy/Galaxy";
 import RouteFocusBridge from "@/galaxy/RouteFocusBridge";
 import { DrawerOutlet } from "@/components/site/DrawerOutlet";
 import BrandedLoader from "@/components/site/BrandedLoader";
+import InteractionHint from "@/components/site/InteractionHint";
 
 function NotFoundComponent() {
   return (
@@ -142,6 +143,9 @@ function RootComponent() {
         <Header />
       </div>
       <DrawerOutlet />
+      <ClientOnly fallback={null}>
+        <InteractionHint />
+      </ClientOnly>
     </QueryClientProvider>
   );
 }
