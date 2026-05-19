@@ -49,11 +49,14 @@ function GltfNode({
   const group = useRef<THREE.Group>(null);
   const ringMat = useRef<THREE.MeshBasicMaterial>(null);
 
-  const radius = useMemo(() => {
+  const { radius, center } = useMemo(() => {
     const box = new THREE.Box3().setFromObject(cloned);
     const sphere = new THREE.Sphere();
     box.getBoundingSphere(sphere);
-    return Math.max(1.5, sphere.radius * 1.25);
+    return {
+      radius: Math.max(1.5, sphere.radius * 1.25),
+      center: sphere.center.clone(),
+    };
   }, [cloned]);
 
   useFrame((state, delta) => {
