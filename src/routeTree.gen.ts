@@ -12,9 +12,14 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as TechnologyRouteImport } from './routes/technology'
 import { Route as PressRouteImport } from './routes/press'
 import { Route as PlatformRouteImport } from './routes/platform'
+import { Route as NsphereRouteImport } from './routes/nsphere'
+import { Route as LumexOnlineRouteImport } from './routes/lumex-online'
+import { Route as LumexRouteImport } from './routes/lumex'
 import { Route as HouseRouteImport } from './routes/house'
+import { Route as FortunoffRouteImport } from './routes/fortunoff'
 import { Route as DiamondsRouteImport } from './routes/diamonds'
 import { Route as ContactRouteImport } from './routes/contact'
+import { Route as AtelierAmaraRouteImport } from './routes/atelier-amara'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
 
@@ -33,9 +38,29 @@ const PlatformRoute = PlatformRouteImport.update({
   path: '/platform',
   getParentRoute: () => rootRouteImport,
 } as any)
+const NsphereRoute = NsphereRouteImport.update({
+  id: '/nsphere',
+  path: '/nsphere',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LumexOnlineRoute = LumexOnlineRouteImport.update({
+  id: '/lumex-online',
+  path: '/lumex-online',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LumexRoute = LumexRouteImport.update({
+  id: '/lumex',
+  path: '/lumex',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const HouseRoute = HouseRouteImport.update({
   id: '/house',
   path: '/house',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FortunoffRoute = FortunoffRouteImport.update({
+  id: '/fortunoff',
+  path: '/fortunoff',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DiamondsRoute = DiamondsRouteImport.update({
@@ -46,6 +71,11 @@ const DiamondsRoute = DiamondsRouteImport.update({
 const ContactRoute = ContactRouteImport.update({
   id: '/contact',
   path: '/contact',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AtelierAmaraRoute = AtelierAmaraRouteImport.update({
+  id: '/atelier-amara',
+  path: '/atelier-amara',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AboutRoute = AboutRouteImport.update({
@@ -62,9 +92,14 @@ const IndexRoute = IndexRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/atelier-amara': typeof AtelierAmaraRoute
   '/contact': typeof ContactRoute
   '/diamonds': typeof DiamondsRoute
+  '/fortunoff': typeof FortunoffRoute
   '/house': typeof HouseRoute
+  '/lumex': typeof LumexRoute
+  '/lumex-online': typeof LumexOnlineRoute
+  '/nsphere': typeof NsphereRoute
   '/platform': typeof PlatformRoute
   '/press': typeof PressRoute
   '/technology': typeof TechnologyRoute
@@ -72,9 +107,14 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/atelier-amara': typeof AtelierAmaraRoute
   '/contact': typeof ContactRoute
   '/diamonds': typeof DiamondsRoute
+  '/fortunoff': typeof FortunoffRoute
   '/house': typeof HouseRoute
+  '/lumex': typeof LumexRoute
+  '/lumex-online': typeof LumexOnlineRoute
+  '/nsphere': typeof NsphereRoute
   '/platform': typeof PlatformRoute
   '/press': typeof PressRoute
   '/technology': typeof TechnologyRoute
@@ -83,9 +123,14 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/atelier-amara': typeof AtelierAmaraRoute
   '/contact': typeof ContactRoute
   '/diamonds': typeof DiamondsRoute
+  '/fortunoff': typeof FortunoffRoute
   '/house': typeof HouseRoute
+  '/lumex': typeof LumexRoute
+  '/lumex-online': typeof LumexOnlineRoute
+  '/nsphere': typeof NsphereRoute
   '/platform': typeof PlatformRoute
   '/press': typeof PressRoute
   '/technology': typeof TechnologyRoute
@@ -95,9 +140,14 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/about'
+    | '/atelier-amara'
     | '/contact'
     | '/diamonds'
+    | '/fortunoff'
     | '/house'
+    | '/lumex'
+    | '/lumex-online'
+    | '/nsphere'
     | '/platform'
     | '/press'
     | '/technology'
@@ -105,9 +155,14 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/about'
+    | '/atelier-amara'
     | '/contact'
     | '/diamonds'
+    | '/fortunoff'
     | '/house'
+    | '/lumex'
+    | '/lumex-online'
+    | '/nsphere'
     | '/platform'
     | '/press'
     | '/technology'
@@ -115,9 +170,14 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/about'
+    | '/atelier-amara'
     | '/contact'
     | '/diamonds'
+    | '/fortunoff'
     | '/house'
+    | '/lumex'
+    | '/lumex-online'
+    | '/nsphere'
     | '/platform'
     | '/press'
     | '/technology'
@@ -126,9 +186,14 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
+  AtelierAmaraRoute: typeof AtelierAmaraRoute
   ContactRoute: typeof ContactRoute
   DiamondsRoute: typeof DiamondsRoute
+  FortunoffRoute: typeof FortunoffRoute
   HouseRoute: typeof HouseRoute
+  LumexRoute: typeof LumexRoute
+  LumexOnlineRoute: typeof LumexOnlineRoute
+  NsphereRoute: typeof NsphereRoute
   PlatformRoute: typeof PlatformRoute
   PressRoute: typeof PressRoute
   TechnologyRoute: typeof TechnologyRoute
@@ -157,11 +222,39 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PlatformRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/nsphere': {
+      id: '/nsphere'
+      path: '/nsphere'
+      fullPath: '/nsphere'
+      preLoaderRoute: typeof NsphereRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/lumex-online': {
+      id: '/lumex-online'
+      path: '/lumex-online'
+      fullPath: '/lumex-online'
+      preLoaderRoute: typeof LumexOnlineRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/lumex': {
+      id: '/lumex'
+      path: '/lumex'
+      fullPath: '/lumex'
+      preLoaderRoute: typeof LumexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/house': {
       id: '/house'
       path: '/house'
       fullPath: '/house'
       preLoaderRoute: typeof HouseRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/fortunoff': {
+      id: '/fortunoff'
+      path: '/fortunoff'
+      fullPath: '/fortunoff'
+      preLoaderRoute: typeof FortunoffRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/diamonds': {
@@ -176,6 +269,13 @@ declare module '@tanstack/react-router' {
       path: '/contact'
       fullPath: '/contact'
       preLoaderRoute: typeof ContactRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/atelier-amara': {
+      id: '/atelier-amara'
+      path: '/atelier-amara'
+      fullPath: '/atelier-amara'
+      preLoaderRoute: typeof AtelierAmaraRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/about': {
@@ -198,9 +298,14 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
+  AtelierAmaraRoute: AtelierAmaraRoute,
   ContactRoute: ContactRoute,
   DiamondsRoute: DiamondsRoute,
+  FortunoffRoute: FortunoffRoute,
   HouseRoute: HouseRoute,
+  LumexRoute: LumexRoute,
+  LumexOnlineRoute: LumexOnlineRoute,
+  NsphereRoute: NsphereRoute,
   PlatformRoute: PlatformRoute,
   PressRoute: PressRoute,
   TechnologyRoute: TechnologyRoute,
