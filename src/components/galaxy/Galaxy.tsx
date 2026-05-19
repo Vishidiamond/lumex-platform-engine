@@ -208,14 +208,15 @@ export default function Galaxy({
   onHoverChange?: (id: string | null) => void;
 }) {
   const [hoveredId, setHoveredId] = useState<string | null>(null);
-  // Visual highlight = mouse hover OR keyboard focus.
-  const highlightId = hoveredId ?? focusedId;
-
+  // Unified focus: selection wins, then mouse hover, then keyboard focus.
+  // One concept drives the visible ring everywhere.
+  const effectiveFocusId = selectedId ?? hoveredId ?? focusedId;
 
   const handleHover = (id: string | null) => {
     setHoveredId(id);
     onHoverChange?.(id);
   };
+
 
   return (
     <div
@@ -235,8 +236,9 @@ export default function Galaxy({
         <color attach="background" args={["#070b18"]} />
         <Scene
           activeIndex={activeIndex}
-          hoveredId={highlightId}
-          focusedId={focusedId}
+          hoveredId={effectiveFocusId}
+          focusedId={effectiveFocusId}
+
 
           selectedId={selectedId}
           onHover={handleHover}
