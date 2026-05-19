@@ -9,7 +9,11 @@ export type BrandStop = {
   target: [number, number, number];
   // Camera position relative to the target (offset added to target).
   offset: [number, number, number];
+  // Short copy for the details panel. Intro stop has no tagline/blurb.
+  tagline?: string;
+  blurb?: string;
 };
+
 
 // Intro stop frames the full galaxy. Brand stops sit ~8 units in front of each
 // constellation, slightly above, so the camera reads the cluster head-on.
