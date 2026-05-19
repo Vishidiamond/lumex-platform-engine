@@ -157,6 +157,7 @@ export default function Galaxy() {
         inset: 0,
         background: "#070b18",
         zIndex: 0,
+        touchAction: "none",
       }}
     >
       <Canvas
