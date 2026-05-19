@@ -1,4 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { lazy, Suspense } from "react";
+
+const Galaxy = lazy(() => import("@/components/galaxy/Galaxy"));
 
 const SITE = "https://lumexconstellation.com";
 
@@ -27,8 +30,14 @@ export const Route = createFileRoute("/")({
 
 function Index() {
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-[#070b18] text-[#e6ecf7]">
-      <p className="text-sm tracking-wide opacity-60">Galaxy will mount here</p>
-    </div>
+    <Suspense
+      fallback={
+        <div className="fixed inset-0 flex items-center justify-center bg-[#070b18] text-[#e6ecf7]">
+          <p className="text-sm tracking-wide opacity-60">Loading galaxy…</p>
+        </div>
+      }
+    >
+      <Galaxy />
+    </Suspense>
   );
 }
