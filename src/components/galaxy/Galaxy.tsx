@@ -1,6 +1,7 @@
-import { Suspense, useMemo, useRef, useState } from "react";
+import { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { Canvas, useFrame, type ThreeEvent } from "@react-three/fiber";
-import { Environment, Stars, useGLTF } from "@react-three/drei";
+import { Billboard, Environment, Stars, useGLTF } from "@react-three/drei";
+
 import * as THREE from "three";
 import { DRACOLoader } from "three-stdlib";
 import { BRAND_STOPS } from "./stops";
