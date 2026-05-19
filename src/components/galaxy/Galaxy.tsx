@@ -1,4 +1,4 @@
-import { Suspense, useMemo, useEffect, useRef } from "react";
+import { Suspense, useMemo, useEffect, useRef, useState } from "react";
 import { Canvas, useThree } from "@react-three/fiber";
 import { Environment, OrbitControls, useGLTF, Stars } from "@react-three/drei";
 import * as THREE from "three";
@@ -116,8 +116,8 @@ function Scene() {
 }
 
 export default function Galaxy() {
-  const [mounted, setMounted] = (require("react") as typeof import("react")).useState(false);
-  (require("react") as typeof import("react")).useEffect(() => setMounted(true), []);
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
 
   return (
     <div style={{ position: "fixed", inset: 0, background: "#070b18" }}>
