@@ -1,5 +1,5 @@
 import { Suspense, useMemo } from "react";
-import { Canvas, useLoader } from "@react-three/fiber";
+import { Canvas } from "@react-three/fiber";
 import { Environment, OrbitControls, useGLTF, Stars } from "@react-three/drei";
 import * as THREE from "three";
 import { DRACOLoader } from "three-stdlib";
