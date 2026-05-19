@@ -97,7 +97,7 @@ function GltfNode({
       }}
     >
       <primitive object={cloned} />
-      <Billboard>
+      <Billboard position={[center.x, center.y, center.z]}>
         <mesh renderOrder={999}>
           <ringGeometry args={[radius, radius + 0.12, 96]} />
           <meshBasicMaterial
