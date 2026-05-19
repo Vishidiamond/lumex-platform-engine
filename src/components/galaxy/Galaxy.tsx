@@ -94,15 +94,26 @@ function AutoFit({ children, margin = 1.25 }: { children: React.ReactNode; margi
 function Scene() {
   return (
     <>
-      <ambientLight intensity={0.25} />
+      <ambientLight intensity={0.6} />
+      <directionalLight position={[10, 20, 10]} intensity={1} />
       <Stars radius={300} depth={80} count={4000} factor={4} fade speed={0.4} />
+      {/* Reference axes/cube — proves camera is framing the scene origin. */}
+      <axesHelper args={[10]} />
+      <mesh position={[0, 0, 0]}>
+        <boxGeometry args={[2, 2, 2]} />
+        <meshStandardMaterial color="#e94560" emissive="#e94560" emissiveIntensity={0.6} />
+      </mesh>
       <Suspense fallback={null}>
-        <Environment files="/assets/nebulas_4.hdr" background={false} />
         <AutoFit>
           <GltfNode url="/assets/center.glb" position={[0, 0, 0]} scale={1} />
           {CONSTELLATIONS.map((c) => (
             <GltfNode key={c.id} url={c.url} position={c.position} scale={c.scale} />
           ))}
+        </AutoFit>
+      </Suspense>
+    </>
+  );
+}
         </AutoFit>
       </Suspense>
     </>
