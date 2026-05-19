@@ -236,8 +236,9 @@ export default function Galaxy({
         <color attach="background" args={["#070b18"]} />
         <Scene
           activeIndex={activeIndex}
-          hoveredId={highlightId}
-          focusedId={focusedId}
+          hoveredId={effectiveFocusId}
+          focusedId={effectiveFocusId}
+
 
           selectedId={selectedId}
           onHover={handleHover}
