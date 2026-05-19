@@ -117,13 +117,13 @@ function Scene() {
 
 export default function Galaxy() {
   return (
-    <div className="fixed inset-0 bg-[#070b18]">
+    <div className="fixed inset-0 bg-fuchsia-900">
       <Canvas
         camera={{ position: [0, 5, 30], fov: 55, near: 0.01, far: 4000 }}
         gl={{ antialias: true, powerPreference: "high-performance" }}
         dpr={[1, 2]}
       >
-        <color attach="background" args={["#070b18"]} />
+        <color attach="background" args={["#003300"]} />
         <Scene />
         <OrbitControls enablePan enableZoom enableRotate makeDefault />
       </Canvas>
