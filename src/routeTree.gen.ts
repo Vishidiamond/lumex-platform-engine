@@ -14,7 +14,6 @@ import { Route as PressRouteImport } from './routes/press'
 import { Route as PlatformRouteImport } from './routes/platform'
 import { Route as NsphereRouteImport } from './routes/nsphere'
 import { Route as LumexOnlineRouteImport } from './routes/lumex-online'
-import { Route as LumexRouteImport } from './routes/lumex'
 import { Route as HouseRouteImport } from './routes/house'
 import { Route as FortunoffRouteImport } from './routes/fortunoff'
 import { Route as DiamondsRouteImport } from './routes/diamonds'
@@ -46,11 +45,6 @@ const NsphereRoute = NsphereRouteImport.update({
 const LumexOnlineRoute = LumexOnlineRouteImport.update({
   id: '/lumex-online',
   path: '/lumex-online',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const LumexRoute = LumexRouteImport.update({
-  id: '/lumex',
-  path: '/lumex',
   getParentRoute: () => rootRouteImport,
 } as any)
 const HouseRoute = HouseRouteImport.update({
@@ -97,7 +91,6 @@ export interface FileRoutesByFullPath {
   '/diamonds': typeof DiamondsRoute
   '/fortunoff': typeof FortunoffRoute
   '/house': typeof HouseRoute
-  '/lumex': typeof LumexRoute
   '/lumex-online': typeof LumexOnlineRoute
   '/nsphere': typeof NsphereRoute
   '/platform': typeof PlatformRoute
@@ -112,7 +105,6 @@ export interface FileRoutesByTo {
   '/diamonds': typeof DiamondsRoute
   '/fortunoff': typeof FortunoffRoute
   '/house': typeof HouseRoute
-  '/lumex': typeof LumexRoute
   '/lumex-online': typeof LumexOnlineRoute
   '/nsphere': typeof NsphereRoute
   '/platform': typeof PlatformRoute
@@ -128,7 +120,6 @@ export interface FileRoutesById {
   '/diamonds': typeof DiamondsRoute
   '/fortunoff': typeof FortunoffRoute
   '/house': typeof HouseRoute
-  '/lumex': typeof LumexRoute
   '/lumex-online': typeof LumexOnlineRoute
   '/nsphere': typeof NsphereRoute
   '/platform': typeof PlatformRoute
@@ -145,7 +136,6 @@ export interface FileRouteTypes {
     | '/diamonds'
     | '/fortunoff'
     | '/house'
-    | '/lumex'
     | '/lumex-online'
     | '/nsphere'
     | '/platform'
@@ -160,7 +150,6 @@ export interface FileRouteTypes {
     | '/diamonds'
     | '/fortunoff'
     | '/house'
-    | '/lumex'
     | '/lumex-online'
     | '/nsphere'
     | '/platform'
@@ -175,7 +164,6 @@ export interface FileRouteTypes {
     | '/diamonds'
     | '/fortunoff'
     | '/house'
-    | '/lumex'
     | '/lumex-online'
     | '/nsphere'
     | '/platform'
@@ -191,7 +179,6 @@ export interface RootRouteChildren {
   DiamondsRoute: typeof DiamondsRoute
   FortunoffRoute: typeof FortunoffRoute
   HouseRoute: typeof HouseRoute
-  LumexRoute: typeof LumexRoute
   LumexOnlineRoute: typeof LumexOnlineRoute
   NsphereRoute: typeof NsphereRoute
   PlatformRoute: typeof PlatformRoute
@@ -234,13 +221,6 @@ declare module '@tanstack/react-router' {
       path: '/lumex-online'
       fullPath: '/lumex-online'
       preLoaderRoute: typeof LumexOnlineRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/lumex': {
-      id: '/lumex'
-      path: '/lumex'
-      fullPath: '/lumex'
-      preLoaderRoute: typeof LumexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/house': {
@@ -303,7 +283,6 @@ const rootRouteChildren: RootRouteChildren = {
   DiamondsRoute: DiamondsRoute,
   FortunoffRoute: FortunoffRoute,
   HouseRoute: HouseRoute,
-  LumexRoute: LumexRoute,
   LumexOnlineRoute: LumexOnlineRoute,
   NsphereRoute: NsphereRoute,
   PlatformRoute: PlatformRoute,

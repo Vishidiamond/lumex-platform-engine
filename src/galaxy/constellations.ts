@@ -8,7 +8,7 @@ export type ConstellationId =
   | "fortunoff";
 
 export type ConstellationRoute =
-  | "/lumex"
+  | "/"
   | "/lumex-online"
   | "/nsphere"
   | "/atelier-amara"
@@ -24,13 +24,11 @@ export type Constellation = {
   blurb: string;
 };
 
-// Canonical brand → constellation mapping. Positions are in world space and
-// CameraController animates camera.position + controls.target toward them.
 export const CONSTELLATIONS: Constellation[] = [
   {
     id: "lumex",
     name: "Lumex",
-    route: "/lumex",
+    route: "/",
     glb: "/assets/orion.glb",
     position: [6, -9, -22],
     tagline: "The AI design engine",
