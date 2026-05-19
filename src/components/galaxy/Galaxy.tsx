@@ -116,18 +116,23 @@ function Scene() {
 }
 
 export default function Galaxy() {
+  const [mounted, setMounted] = (require("react") as typeof import("react")).useState(false);
+  (require("react") as typeof import("react")).useEffect(() => setMounted(true), []);
+
   return (
-    <div style={{ position: "fixed", inset: 0, background: "magenta" }}>
-      <Canvas
-        style={{ width: "100%", height: "100%", display: "block" }}
-        camera={{ position: [0, 5, 30], fov: 55, near: 0.01, far: 4000 }}
-        gl={{ antialias: true, powerPreference: "high-performance" }}
-        dpr={[1, 2]}
-      >
-        <color attach="background" args={["lime"]} />
-        <Scene />
-        <OrbitControls enablePan enableZoom enableRotate makeDefault />
-      </Canvas>
+    <div style={{ position: "fixed", inset: 0, background: "#070b18" }}>
+      {mounted && (
+        <Canvas
+          style={{ width: "100%", height: "100%", display: "block" }}
+          camera={{ position: [0, 5, 30], fov: 55, near: 0.01, far: 4000 }}
+          gl={{ antialias: true, powerPreference: "high-performance" }}
+          dpr={[1, 2]}
+        >
+          <color attach="background" args={["#0a1530"]} />
+          <Scene />
+          <OrbitControls enablePan enableZoom enableRotate makeDefault />
+        </Canvas>
+      )}
     </div>
   );
 }
