@@ -6,12 +6,15 @@ import {
   useRouter,
   HeadContent,
   Scripts,
+  ClientOnly,
 } from "@tanstack/react-router";
 
 import appCss from "../styles.css?url";
 import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Footer";
 import { LenisProvider } from "@/components/site/LenisProvider";
+import Galaxy from "@/components/galaxy/Galaxy";
+import RouteFocusBridge from "@/galaxy/RouteFocusBridge";
 
 function NotFoundComponent() {
   return (
@@ -128,7 +131,12 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <LenisProvider />
-      <div className="flex min-h-screen flex-col">
+      {/* Galaxy lives globally so route changes only re-focus the camera */}
+      <ClientOnly fallback={null}>
+        <Galaxy />
+      </ClientOnly>
+      <RouteFocusBridge />
+      <div className="relative z-10 flex min-h-screen flex-col">
         <Header />
         <main className="flex-1">
           <Outlet />
