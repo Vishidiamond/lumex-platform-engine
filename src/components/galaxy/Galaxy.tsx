@@ -128,7 +128,7 @@ export default function Galaxy() {
           gl={{ antialias: true, powerPreference: "high-performance" }}
           dpr={[1, 2]}
         >
-          <color attach="background" args={["#0a1530"]} />
+          <color attach="background" args={["lime"]} />
           <Scene />
           <OrbitControls enablePan enableZoom enableRotate makeDefault />
         </Canvas>
