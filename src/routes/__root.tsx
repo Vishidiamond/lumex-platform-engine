@@ -1,6 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
-  Outlet,
   Link,
   createRootRouteWithContext,
   useRouter,
@@ -11,10 +10,10 @@ import {
 
 import appCss from "../styles.css?url";
 import { Header } from "@/components/site/Header";
-import { Footer } from "@/components/site/Footer";
 import { LenisProvider } from "@/components/site/LenisProvider";
 import Galaxy from "@/components/galaxy/Galaxy";
 import RouteFocusBridge from "@/galaxy/RouteFocusBridge";
+import { DrawerOutlet } from "@/components/site/DrawerOutlet";
 
 function NotFoundComponent() {
   return (
@@ -131,18 +130,14 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <LenisProvider />
-      {/* Galaxy lives globally so route changes only re-focus the camera */}
       <ClientOnly fallback={null}>
         <Galaxy />
       </ClientOnly>
       <RouteFocusBridge />
-      <div className="relative z-10 flex min-h-screen flex-col">
+      <div style={{ position: "relative", zIndex: 10, pointerEvents: "none" }}>
         <Header />
-        <main className="flex-1">
-          <Outlet />
-        </main>
-        <Footer />
       </div>
+      <DrawerOutlet />
     </QueryClientProvider>
   );
 }
