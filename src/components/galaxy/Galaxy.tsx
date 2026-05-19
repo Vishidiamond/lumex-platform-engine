@@ -117,7 +117,6 @@ function Scene() {
 
 export default function Galaxy() {
   return (
-  return (
     <div style={{ position: "fixed", inset: 0, background: "#070b18" }}>
       <Canvas
         style={{ width: "100%", height: "100%", display: "block" }}
