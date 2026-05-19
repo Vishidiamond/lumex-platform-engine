@@ -29,29 +29,45 @@ export const BRAND_STOPS: BrandStop[] = [
     label: "Lumex.online",
     target: [18, 4, -6],
     offset: [0, 2, 9],
+    tagline: "The trading platform",
+    blurb:
+      "A live marketplace where the world's diamond inventory becomes searchable, comparable, and tradable in real time.",
   },
   {
     id: "lumex",
     label: "Lumex",
     target: [-14, 7, -12],
     offset: [0, 2, 9],
+    tagline: "The AI design engine",
+    blurb:
+      "Proprietary AI that designs jewelry end-to-end — from stone selection to render-ready CAD — at a scale the craft has never seen.",
   },
   {
     id: "nsphere",
     label: "Nsphere",
     target: [6, -9, -22],
     offset: [0, 2, 9],
+    tagline: "The data backbone",
+    blurb:
+      "The intelligence layer powering every Lumex division: pricing, provenance, and demand signals unified into one graph.",
   },
   {
     id: "atelier_amara",
     label: "Atelier Amara",
     target: [-8, 3, -30],
     offset: [0, 2, 9],
+    tagline: "The contemporary house",
+    blurb:
+      "An in-house brand built for a new generation of jewelry buyers — design-led, digitally native, quietly luxurious.",
   },
   {
     id: "fortunoff",
     label: "Fortunoff",
     target: [22, 12, -26],
     offset: [0, 2, 9],
+    tagline: "The heritage house",
+    blurb:
+      "A storied American jeweler, reimagined with Lumex's design engine and supply chain at its core.",
   },
 ];
+
