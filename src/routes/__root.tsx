@@ -147,9 +147,7 @@ function RootComponent() {
         <BrandedLoader />
       </ClientOnly>
       <RouteFocusBridge />
-      <div style={{ position: "relative", zIndex: 10, pointerEvents: "none" }}>
-        <Header />
-      </div>
+      <Header />
       <DrawerOutlet />
       <ClientOnly fallback={null}>
         <InteractionHint />

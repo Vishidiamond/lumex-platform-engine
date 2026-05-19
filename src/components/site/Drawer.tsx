@@ -27,11 +27,12 @@ export function Drawer({
         borderLeft: "1px solid rgba(255, 255, 255, 0.08)",
         zIndex: 20,
         pointerEvents: isOpen ? "auto" : "none",
-        overflowY: "auto",
+        overflowY: isOpen ? "auto" : "hidden",
         overflowX: "hidden",
         padding: "80px 40px 40px 40px",
         transform: isOpen ? "translateX(0)" : "translateX(100%)",
         transition: "transform 300ms cubic-bezier(0.4, 0, 0.2, 1)",
+        visibility: isOpen ? "visible" : "hidden",
         color: "#e6ecf7",
       }}
     >
