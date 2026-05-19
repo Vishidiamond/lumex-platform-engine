@@ -24,12 +24,14 @@ type ConstellationDef = {
   scale?: number;
 };
 
+// GLB constellations are authored at unit scale (~10 units across each).
+// Lay them out on a small spherical-ish cloud around the origin.
 const CONSTELLATIONS: ConstellationDef[] = [
-  { id: "aquarius", url: "/assets/aquarius.glb", position: [300, 0, -200], scale: 1 },
-  { id: "cygnus", url: "/assets/cygnus.glb", position: [-200, 100, -400], scale: 1 },
-  { id: "orion", url: "/assets/orion.glb", position: [100, -150, -700], scale: 1 },
-  { id: "phoenix", url: "/assets/phoenix.glb", position: [-100, 50, -1000], scale: 1 },
-  { id: "ursa_major", url: "/assets/ursa_major.glb", position: [400, 200, -900], scale: 1 },
+  { id: "aquarius", url: "/assets/aquarius.glb", position: [18, 4, -6], scale: 1 },
+  { id: "cygnus", url: "/assets/cygnus.glb", position: [-14, 7, -12], scale: 1 },
+  { id: "orion", url: "/assets/orion.glb", position: [6, -9, -22], scale: 1 },
+  { id: "phoenix", url: "/assets/phoenix.glb", position: [-8, 3, -30], scale: 1 },
+  { id: "ursa_major", url: "/assets/ursa_major.glb", position: [22, 12, -26], scale: 1 },
 ];
 
 function GltfNode({ url, position, scale = 1 }: { url: string; position: [number, number, number]; scale?: number }) {
@@ -93,7 +95,7 @@ function Scene() {
   return (
     <>
       <ambientLight intensity={0.25} />
-      <Stars radius={2000} depth={400} count={4000} factor={5} fade speed={0.4} />
+      <Stars radius={300} depth={80} count={4000} factor={4} fade speed={0.4} />
       <Suspense fallback={null}>
         <Environment files="/assets/nebulas_4.hdr" background={false} />
         <AutoFit>
@@ -111,7 +113,7 @@ export default function Galaxy() {
   return (
     <div className="fixed inset-0 bg-[#070b18]">
       <Canvas
-        camera={{ position: [0, 50, 250], fov: 55, near: 0.1, far: 8000 }}
+        camera={{ position: [0, 5, 30], fov: 55, near: 0.01, far: 4000 }}
         gl={{ antialias: true, powerPreference: "high-performance" }}
         dpr={[1, 2]}
       >
