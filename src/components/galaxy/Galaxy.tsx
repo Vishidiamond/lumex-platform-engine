@@ -1,6 +1,6 @@
-import { Suspense, useMemo } from "react";
-import { Canvas } from "@react-three/fiber";
-import { Environment, OrbitControls, useGLTF, Stars } from "@react-three/drei";
+import { Suspense, useMemo, useEffect, useRef } from "react";
+import { Canvas, useThree } from "@react-three/fiber";
+import { Environment, OrbitControls, useGLTF, Stars, Bounds, useBounds } from "@react-three/drei";
 import * as THREE from "three";
 import { DRACOLoader } from "three-stdlib";
 
@@ -38,6 +38,50 @@ function GltfNode({ url, position, scale = 1 }: { url: string; position: [number
   return <primitive object={cloned} position={position} scale={scale} />;
 }
 
+/** Refits camera to enclose all children whenever they mount/change. */
+function AutoFit({ children }: { children: React.ReactNode }) {
+  return (
+    <Bounds fit clip observe margin={1.2}>
+      <FitOnLoad>{children}</FitOnLoad>
+    </Bounds>
+  );
+}
+
+function FitOnLoad({ children }: { children: React.ReactNode }) {
+  const bounds = useBounds();
+  const groupRef = useRef<THREE.Group>(null);
+  const { camera } = useThree();
+
+  // After children suspend-resolve, walk the group and call refresh/fit once
+  // we actually have geometry to measure.
+  useEffect(() => {
+    let raf = 0;
+    let tries = 0;
+    const attempt = () => {
+      tries += 1;
+      const group = groupRef.current;
+      if (!group) return;
+      const box = new THREE.Box3().setFromObject(group);
+      const size = new THREE.Vector3();
+      box.getSize(size);
+      const meaningful = size.length() > 1; // avoid empty/zero box on first frames
+      if (meaningful) {
+        // Push camera's far plane out so the largest dimension fits comfortably.
+        const persp = camera as THREE.PerspectiveCamera;
+        persp.far = Math.max(persp.far, size.length() * 4);
+        persp.updateProjectionMatrix();
+        bounds.refresh(group).clip().fit();
+        return;
+      }
+      if (tries < 60) raf = requestAnimationFrame(attempt);
+    };
+    raf = requestAnimationFrame(attempt);
+    return () => cancelAnimationFrame(raf);
+  }, [bounds, camera]);
+
+  return <group ref={groupRef}>{children}</group>;
+}
+
 function Scene() {
   return (
     <>
@@ -45,10 +89,12 @@ function Scene() {
       <Stars radius={2000} depth={400} count={4000} factor={5} fade speed={0.4} />
       <Suspense fallback={null}>
         <Environment files="/assets/nebulas_4.hdr" background={false} />
-        <GltfNode url="/assets/center.glb" position={[0, 0, 0]} scale={1} />
-        {CONSTELLATIONS.map((c) => (
-          <GltfNode key={c.id} url={c.url} position={c.position} scale={c.scale} />
-        ))}
+        <AutoFit>
+          <GltfNode url="/assets/center.glb" position={[0, 0, 0]} scale={1} />
+          {CONSTELLATIONS.map((c) => (
+            <GltfNode key={c.id} url={c.url} position={c.position} scale={c.scale} />
+          ))}
+        </AutoFit>
       </Suspense>
     </>
   );
@@ -58,15 +104,15 @@ export default function Galaxy() {
   return (
     <div className="fixed inset-0 bg-[#070b18]">
       <Canvas
-        camera={{ position: [0, 50, 250], fov: 55, near: 0.1, far: 5000 }}
+        camera={{ position: [0, 50, 250], fov: 55, near: 0.1, far: 8000 }}
         gl={{ antialias: true, powerPreference: "high-performance" }}
         dpr={[1, 2]}
       >
         <color attach="background" args={["#070b18"]} />
-        <fog attach="fog" args={["#070b18", 600, 3500]} />
         <Scene />
         <OrbitControls enablePan enableZoom enableRotate makeDefault />
       </Canvas>
     </div>
   );
 }
+
