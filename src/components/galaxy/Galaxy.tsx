@@ -2,8 +2,7 @@ import { Suspense, useMemo } from "react";
 import { Canvas, useLoader } from "@react-three/fiber";
 import { Environment, OrbitControls, useGLTF, Stars } from "@react-three/drei";
 import * as THREE from "three";
-import { DRACOLoader } from "three/examples/jsm/loaders/DRACOLoader.js";
-import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
+import { DRACOLoader } from "three-stdlib";
 
 // Configure a shared Draco loader for all useGLTF calls.
 const dracoLoader = new DRACOLoader();
@@ -16,7 +15,7 @@ useGLTF.preload("/assets/orion.glb");
 useGLTF.preload("/assets/phoenix.glb");
 useGLTF.preload("/assets/ursa_major.glb");
 
-const extendLoader = (loader: GLTFLoader) => loader.setDRACOLoader(dracoLoader);
+const extendLoader = (loader: any) => loader.setDRACOLoader(dracoLoader);
 
 type ConstellationDef = {
   id: string;
