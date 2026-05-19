@@ -155,12 +155,14 @@ function Scene({
   activeIndex,
   hoveredId,
   selectedId,
+  focusedId,
   onHover,
   onSelect,
 }: {
   activeIndex: number;
   hoveredId: string | null;
   selectedId: string | null;
+  focusedId: string | null;
   onHover: (id: string | null) => void;
   onSelect: (id: string) => void;
 }) {
@@ -179,6 +181,7 @@ function Scene({
             position={c.position}
             hovered={hoveredId === c.id}
             selected={selectedId === c.id}
+            focused={focusedId === c.id}
             onPointerOver={() => onHover(c.id)}
             onPointerOut={() => onHover(null)}
             onClick={() => onSelect(c.id)}
@@ -189,6 +192,7 @@ function Scene({
     </>
   );
 }
+
 
 export default function Galaxy({
   activeIndex = 0,
