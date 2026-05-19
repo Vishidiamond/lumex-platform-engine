@@ -157,15 +157,20 @@ function Scene({
 export default function Galaxy({
   activeIndex = 0,
   selectedId = null,
+  focusedId = null,
   onSelect,
   onHoverChange,
 }: {
   activeIndex?: number;
   selectedId?: string | null;
+  focusedId?: string | null;
   onSelect?: (id: string) => void;
   onHoverChange?: (id: string | null) => void;
 }) {
   const [hoveredId, setHoveredId] = useState<string | null>(null);
+  // Visual highlight = mouse hover OR keyboard focus.
+  const highlightId = hoveredId ?? focusedId;
+
 
   const handleHover = (id: string | null) => {
     setHoveredId(id);
