@@ -16,6 +16,7 @@ import RouteFocusBridge from "@/galaxy/RouteFocusBridge";
 import { DrawerOutlet } from "@/components/site/DrawerOutlet";
 import BrandedLoader from "@/components/site/BrandedLoader";
 import InteractionHint from "@/components/site/InteractionHint";
+import AudioToggle from "@/components/site/AudioToggle";
 import MobileHome from "@/components/site/MobileHome";
 import { useIsNarrow } from "@/hooks/use-is-narrow";
 
@@ -152,6 +153,9 @@ function RootComponent() {
       <DrawerOutlet />
       <ClientOnly fallback={null}>
         <InteractionHint />
+      </ClientOnly>
+      <ClientOnly fallback={null}>
+        <AudioToggle />
       </ClientOnly>
     </QueryClientProvider>
   );
