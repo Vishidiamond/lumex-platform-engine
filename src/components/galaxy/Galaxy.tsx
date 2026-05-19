@@ -40,6 +40,7 @@ function GltfNode({
   scale = 1,
   hovered = false,
   selected = false,
+  focused = false,
   onPointerOver,
   onPointerOut,
   onClick,
@@ -49,6 +50,7 @@ function GltfNode({
   scale?: number;
   hovered?: boolean;
   selected?: boolean;
+  focused?: boolean;
   onPointerOver?: (e: ThreeEvent<PointerEvent>) => void;
   onPointerOut?: (e: ThreeEvent<PointerEvent>) => void;
   onClick?: (e: ThreeEvent<MouseEvent>) => void;
@@ -56,16 +58,32 @@ function GltfNode({
   const { scene } = useGLTF(url, undefined, undefined, extendLoader) as any;
   const cloned = useMemo(() => scene.clone(true), [scene]);
   const group = useRef<THREE.Group>(null);
+  const ringMat = useRef<THREE.MeshBasicMaterial>(null);
 
-  // Subtle scale up on hover / selected.
-  useFrame((_, delta) => {
-    if (!group.current) return;
-    const targetScale = scale * (selected ? 1.18 : hovered ? 1.1 : 1);
-    const k = 1 - Math.exp(-delta * 8);
-    group.current.scale.lerp(
-      new THREE.Vector3(targetScale, targetScale, targetScale),
-      k,
-    );
+  // Bounding sphere radius drives the focus ring size.
+  const radius = useMemo(() => {
+    const box = new THREE.Box3().setFromObject(cloned);
+    const sphere = new THREE.Sphere();
+    box.getBoundingSphere(sphere);
+    return Math.max(1.5, sphere.radius * 1.25);
+  }, [cloned]);
+
+  // Subtle scale on hover/selected + ring opacity pulse when focused.
+  useFrame((state, delta) => {
+    if (group.current) {
+      const targetScale = scale * (selected ? 1.18 : hovered || focused ? 1.1 : 1);
+      const k = 1 - Math.exp(-delta * 8);
+      group.current.scale.lerp(
+        new THREE.Vector3(targetScale, targetScale, targetScale),
+        k,
+      );
+    }
+    if (ringMat.current) {
+      const base = focused ? 0.85 : 0;
+      const pulse = focused ? Math.sin(state.clock.elapsedTime * 3) * 0.15 : 0;
+      const target = base + pulse;
+      ringMat.current.opacity += (target - ringMat.current.opacity) * (1 - Math.exp(-delta * 10));
+    }
   });
 
   return (
@@ -86,9 +104,26 @@ function GltfNode({
       }}
     >
       <primitive object={cloned} />
+      {/* Focus ring — billboarded so it always faces the camera */}
+      <Billboard>
+        <mesh renderOrder={999}>
+          <ringGeometry args={[radius, radius + 0.12, 96]} />
+          <meshBasicMaterial
+            ref={ringMat}
+            color="#a5c8ff"
+            transparent
+            opacity={0}
+            side={THREE.DoubleSide}
+            depthTest={false}
+            depthWrite={false}
+            toneMapped={false}
+          />
+        </mesh>
+      </Billboard>
     </group>
   );
 }
+
 
 /** Smoothly tweens the camera between BRAND_STOPS entries by index. */
 function CameraRig({ activeIndex }: { activeIndex: number }) {
