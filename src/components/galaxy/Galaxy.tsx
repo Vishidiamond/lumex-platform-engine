@@ -236,6 +236,8 @@ export default function Galaxy({
         <Scene
           activeIndex={activeIndex}
           hoveredId={highlightId}
+          focusedId={focusedId}
+
           selectedId={selectedId}
           onHover={handleHover}
           onSelect={(id) => onSelect?.(id)}
