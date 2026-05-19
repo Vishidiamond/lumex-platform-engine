@@ -1,19 +1,28 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { ArrowUpRight } from "lucide-react";
 
+const SITE = "https://lumexconstellation.com";
+
 export const Route = createFileRoute("/fortunoff")({
   component: FortunoffPage,
   head: () => ({
     meta: [
-      { title: "Fortunoff — Lumex" },
+      { title: "Fortunoff — Heritage rebuilt on modern rails | Lumex" },
       {
         name: "description",
         content:
-          "Fortunoff is the licensed U.S. heritage revival — an American jewelry name brought back on modern rails.",
+          "A heritage brand reborn on the Lumex platform — taking the classic and making it iconic.",
       },
-      { property: "og:title", content: "Fortunoff — Lumex" },
-      { property: "og:description", content: "Heritage, rebuilt on modern rails." },
+      { property: "og:title", content: "Fortunoff — Heritage rebuilt on modern rails | Lumex" },
+      {
+        property: "og:description",
+        content:
+          "A heritage brand reborn on the Lumex platform — taking the classic and making it iconic.",
+      },
+      { property: "og:type", content: "website" },
+      { property: "og:url", content: `${SITE}/fortunoff` },
     ],
+    links: [{ rel: "canonical", href: `${SITE}/fortunoff` }],
   }),
 });
 

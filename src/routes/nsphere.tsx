@@ -7,14 +7,18 @@ export const Route = createFileRoute("/nsphere")({
   component: NspherePage,
   head: () => ({
     meta: [
-      { title: "Nsphere — Lumex" },
+      { title: "Nsphere — AI is the layer underneath | Lumex" },
       {
         name: "description",
         content:
-          "AI is not a feature at Lumex. It is the layer underneath everything. Nsphere holds the patent for AI-driven CAD merging.",
+          "Nsphere is the AI foundation of Lumex. CAD-merging patents and design generation at scale.",
       },
-      { property: "og:title", content: "Nsphere — Lumex" },
-      { property: "og:description", content: "The patent layer underneath modern jewelry design." },
+      { property: "og:title", content: "Nsphere — AI is the layer underneath | Lumex" },
+      {
+        property: "og:description",
+        content:
+          "Nsphere is the AI foundation of Lumex. CAD-merging patents and design generation at scale.",
+      },
       { property: "og:type", content: "website" },
       { property: "og:url", content: `${SITE}/nsphere` },
     ],

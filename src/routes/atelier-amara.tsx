@@ -1,19 +1,28 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { ArrowUpRight } from "lucide-react";
 
+const SITE = "https://lumexconstellation.com";
+
 export const Route = createFileRoute("/atelier-amara")({
   component: AtelierAmaraPage,
   head: () => ({
     meta: [
-      { title: "Atelier Amara — Lumex" },
+      { title: "Atelier Amara — Modular fine jewelry | Lumex" },
       {
         name: "description",
         content:
-          "Atelier Amara is a refined, modular maison of fine jewelry — designed to be lived in.",
+          "Patented modular jewelry system. Owned IP, calibrated stones, designed in-house.",
       },
-      { property: "og:title", content: "Atelier Amara — Lumex" },
-      { property: "og:description", content: "Modular fine jewelry. Patented system." },
+      { property: "og:title", content: "Atelier Amara — Modular fine jewelry | Lumex" },
+      {
+        property: "og:description",
+        content:
+          "Patented modular jewelry system. Owned IP, calibrated stones, designed in-house.",
+      },
+      { property: "og:type", content: "website" },
+      { property: "og:url", content: `${SITE}/atelier-amara` },
     ],
+    links: [{ rel: "canonical", href: `${SITE}/atelier-amara` }],
   }),
 });
 
