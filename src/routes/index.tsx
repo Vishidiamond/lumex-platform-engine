@@ -42,10 +42,14 @@ function Index() {
   );
 }
 
+// IDs of selectable constellations in keyboard-cycle order (excludes "intro").
+const BRAND_IDS = BRAND_STOPS.filter((s) => s.id !== "intro").map((s) => s.id);
+
 function GalaxyExperience() {
   const [activeIndex, setActiveIndex] = useState(0);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [hoveredId, setHoveredId] = useState<string | null>(null);
+  const [focusedId, setFocusedId] = useState<string | null>(null);
   const sectionRefs = useRef<Array<HTMLElement | null>>([]);
 
   useEffect(() => {
@@ -82,14 +86,73 @@ function GalaxyExperience() {
   const handleSelect = (id: string) => {
     const idx = BRAND_STOPS.findIndex((s) => s.id === id);
     setSelectedId(id);
+    setFocusedId(id);
     if (idx >= 0) scrollTo(idx);
   };
+
+  // Keyboard navigation: ←/→ or ↑/↓ cycle focus, Enter/Space selects, Esc clears.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement | null;
+      if (
+        target &&
+        (target.tagName === "INPUT" ||
+          target.tagName === "TEXTAREA" ||
+          target.isContentEditable)
+      ) {
+        return;
+      }
+
+      const cycle = (dir: 1 | -1) => {
+        e.preventDefault();
+        const current = focusedId ?? selectedId;
+        const idx = current ? BRAND_IDS.indexOf(current) : -1;
+        const next =
+          idx === -1
+            ? dir === 1
+              ? 0
+              : BRAND_IDS.length - 1
+            : (idx + dir + BRAND_IDS.length) % BRAND_IDS.length;
+        setFocusedId(BRAND_IDS[next]);
+      };
+
+      switch (e.key) {
+        case "ArrowRight":
+        case "ArrowDown":
+        case "Tab":
+          if (e.key === "Tab" && e.shiftKey) cycle(-1);
+          else cycle(1);
+          break;
+        case "ArrowLeft":
+        case "ArrowUp":
+          cycle(-1);
+          break;
+        case "Enter":
+        case " ":
+          if (focusedId) {
+            e.preventDefault();
+            handleSelect(focusedId);
+          }
+          break;
+        case "Escape":
+          e.preventDefault();
+          setSelectedId(null);
+          setFocusedId(null);
+          break;
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [focusedId, selectedId]);
 
   const selectedStop = selectedId
     ? BRAND_STOPS.find((s) => s.id === selectedId) ?? null
     : null;
-  const hoveredStop = hoveredId
-    ? BRAND_STOPS.find((s) => s.id === hoveredId) ?? null
+  // Tooltip prefers mouse hover, falls back to keyboard focus.
+  const tipId = hoveredId ?? focusedId;
+  const hoveredStop = tipId
+    ? BRAND_STOPS.find((s) => s.id === tipId) ?? null
     : null;
 
   return (
@@ -97,7 +160,9 @@ function GalaxyExperience() {
       <Galaxy
         activeIndex={activeIndex}
         selectedId={selectedId}
+        focusedId={focusedId}
         onSelect={handleSelect}
+
         onHoverChange={setHoveredId}
       />
 
