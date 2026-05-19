@@ -1,26 +1,45 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useProgress } from "@react-three/drei";
 import logo from "@/assets/lumex-logo.png";
 
 const SIZE = 160;
 const RADIUS = 76;
 const CIRC = 2 * Math.PI * RADIUS;
+const MIN_DISPLAY_MS = 600;
 
 export default function BrandedLoader() {
-  const { progress } = useProgress();
-  const [mounted, setMounted] = useState(true);
-  const [visible, setVisible] = useState(true);
+  const { progress, total } = useProgress();
+  const [mounted, setMounted] = useState(false);
+  const [visible, setVisible] = useState(false);
+  const dismissedRef = useRef(false);
+  const shownAt = useRef<number | null>(null);
 
+  // Show the loader the first time any asset actually starts loading.
   useEffect(() => {
-    if (progress >= 100) {
-      const t1 = setTimeout(() => setVisible(false), 50);
-      const t2 = setTimeout(() => setMounted(false), 400);
-      return () => {
-        clearTimeout(t1);
-        clearTimeout(t2);
-      };
+    if (dismissedRef.current) return;
+    if (total > 0 && !mounted) {
+      setMounted(true);
+      setVisible(true);
+      shownAt.current = performance.now();
     }
-  }, [progress]);
+  }, [total, mounted]);
+
+  // Dismiss when progress reaches 100, after a minimum display time.
+  useEffect(() => {
+    if (!mounted || dismissedRef.current) return;
+    if (progress < 100) return;
+    const elapsed = shownAt.current ? performance.now() - shownAt.current : 0;
+    const wait = Math.max(0, MIN_DISPLAY_MS - elapsed);
+    const t1 = setTimeout(() => setVisible(false), wait);
+    const t2 = setTimeout(() => {
+      dismissedRef.current = true;
+      setMounted(false);
+    }, wait + 350);
+    return () => {
+      clearTimeout(t1);
+      clearTimeout(t2);
+    };
+  }, [progress, mounted]);
 
   if (!mounted) return null;
 

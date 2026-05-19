@@ -3,25 +3,36 @@ import { useLocation } from "@tanstack/react-router";
 import { Volume2, VolumeX } from "lucide-react";
 
 const KEY = "lumex_audio_enabled";
-// TODO: Upload an ambient drone track to /public/audio/ambient.mp3
 const SRC = "/audio/ambient.mp3";
 const TARGET_VOLUME = 0.4;
 
 export default function AudioToggle() {
   const { pathname } = useLocation();
   const [enabled, setEnabled] = useState(false);
+  const [available, setAvailable] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const fadeRef = useRef<number | null>(null);
 
+  // Probe for the audio file — hide button if missing.
   useEffect(() => {
-    if (typeof window === "undefined") return;
-    const stored = localStorage.getItem(KEY) === "1";
-    setEnabled(stored);
+    let cancelled = false;
+    fetch(SRC, { method: "HEAD" })
+      .then((r) => {
+        if (!cancelled && r.ok) setAvailable(true);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
-  // Manage audio element
   useEffect(() => {
     if (typeof window === "undefined") return;
+    setEnabled(localStorage.getItem(KEY) === "1");
+  }, []);
+
+  useEffect(() => {
+    if (!available) return;
     if (!audioRef.current) {
       const a = new Audio(SRC);
       a.loop = true;
@@ -32,7 +43,7 @@ export default function AudioToggle() {
       if (fadeRef.current) cancelAnimationFrame(fadeRef.current);
       audioRef.current?.pause();
     };
-  }, []);
+  }, [available]);
 
   const fade = (to: number, ms: number, after?: () => void) => {
     const a = audioRef.current;
@@ -54,6 +65,7 @@ export default function AudioToggle() {
   };
 
   useEffect(() => {
+    if (!available) return;
     const a = audioRef.current;
     if (!a) return;
     if (enabled) {
@@ -63,9 +75,9 @@ export default function AudioToggle() {
     } else {
       fade(0, 500, () => a.pause());
     }
-  }, [enabled]);
+  }, [enabled, available]);
 
-  if (pathname !== "/") return null;
+  if (pathname !== "/" || !available) return null;
 
   const toggle = () => {
     const next = !enabled;
