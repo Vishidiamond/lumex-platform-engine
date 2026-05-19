@@ -195,6 +195,16 @@ export default function Galaxy({
         <color attach="background" args={["#070b18"]} />
         <Scene
           activeIndex={activeIndex}
+          hoveredId={highlightId}
+
+        style={{ width: "100%", height: "100%", display: "block" }}
+        camera={{ position: [0, 6, 38], fov: 55, near: 0.1, far: 4000 }}
+        gl={{ antialias: true, powerPreference: "high-performance" }}
+        dpr={[1, 2]}
+      >
+        <color attach="background" args={["#070b18"]} />
+        <Scene
+          activeIndex={activeIndex}
           hoveredId={hoveredId}
           selectedId={selectedId}
           onHover={handleHover}
