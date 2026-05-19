@@ -1,5 +1,5 @@
-import { Suspense, useMemo, useRef } from "react";
-import { Canvas, useFrame } from "@react-three/fiber";
+import { Suspense, useMemo, useRef, useState } from "react";
+import { Canvas, useFrame, type ThreeEvent } from "@react-three/fiber";
 import { Environment, Stars, useGLTF } from "@react-three/drei";
 import * as THREE from "three";
 import { DRACOLoader } from "three-stdlib";
@@ -37,18 +37,59 @@ function GltfNode({
   url,
   position,
   scale = 1,
+  hovered = false,
+  selected = false,
+  onPointerOver,
+  onPointerOut,
+  onClick,
 }: {
   url: string;
   position: [number, number, number];
   scale?: number;
+  hovered?: boolean;
+  selected?: boolean;
+  onPointerOver?: (e: ThreeEvent<PointerEvent>) => void;
+  onPointerOut?: (e: ThreeEvent<PointerEvent>) => void;
+  onClick?: (e: ThreeEvent<MouseEvent>) => void;
 }) {
   const { scene } = useGLTF(url, undefined, undefined, extendLoader) as any;
   const cloned = useMemo(() => scene.clone(true), [scene]);
-  return <primitive object={cloned} position={position} scale={scale} />;
+  const group = useRef<THREE.Group>(null);
+
+  // Subtle scale up on hover / selected.
+  useFrame((_, delta) => {
+    if (!group.current) return;
+    const targetScale = scale * (selected ? 1.18 : hovered ? 1.1 : 1);
+    const k = 1 - Math.exp(-delta * 8);
+    group.current.scale.lerp(
+      new THREE.Vector3(targetScale, targetScale, targetScale),
+      k,
+    );
+  });
+
+  return (
+    <group
+      ref={group}
+      position={position}
+      onPointerOver={(e) => {
+        e.stopPropagation();
+        onPointerOver?.(e);
+      }}
+      onPointerOut={(e) => {
+        e.stopPropagation();
+        onPointerOut?.(e);
+      }}
+      onClick={(e) => {
+        e.stopPropagation();
+        onClick?.(e);
+      }}
+    >
+      <primitive object={cloned} />
+    </group>
+  );
 }
 
-/** Smoothly tweens the camera between BRAND_STOPS entries by index.
- *  Uses frame-rate-independent exponential easing toward the target stop. */
+/** Smoothly tweens the camera between BRAND_STOPS entries by index. */
 function CameraRig({ activeIndex }: { activeIndex: number }) {
   const targetPos = useRef(new THREE.Vector3());
   const targetLook = useRef(new THREE.Vector3());
@@ -65,7 +106,6 @@ function CameraRig({ activeIndex }: { activeIndex: number }) {
       stop.target[2] + stop.offset[2],
     );
 
-    // Exponential smoothing — ~1.2s to settle, framerate independent.
     const k = 1 - Math.exp(-delta * 2.4);
     state.camera.position.lerp(targetPos.current, k);
     currentLook.current.lerp(targetLook.current, k);
@@ -75,7 +115,19 @@ function CameraRig({ activeIndex }: { activeIndex: number }) {
   return null;
 }
 
-function Scene({ activeIndex }: { activeIndex: number }) {
+function Scene({
+  activeIndex,
+  hoveredId,
+  selectedId,
+  onHover,
+  onSelect,
+}: {
+  activeIndex: number;
+  hoveredId: string | null;
+  selectedId: string | null;
+  onHover: (id: string | null) => void;
+  onSelect: (id: string) => void;
+}) {
   return (
     <>
       <ambientLight intensity={0.5} />
@@ -85,7 +137,16 @@ function Scene({ activeIndex }: { activeIndex: number }) {
         <Environment files="/assets/nebulas_4.hdr" background={false} />
         <GltfNode url="/assets/center.glb" position={[0, 0, 0]} />
         {CONSTELLATIONS.map((c) => (
-          <GltfNode key={c.id} url={c.url} position={c.position} />
+          <GltfNode
+            key={c.id}
+            url={c.url}
+            position={c.position}
+            hovered={hoveredId === c.id}
+            selected={selectedId === c.id}
+            onPointerOver={() => onHover(c.id)}
+            onPointerOut={() => onHover(null)}
+            onClick={() => onSelect(c.id)}
+          />
         ))}
       </Suspense>
       <CameraRig activeIndex={activeIndex} />
@@ -93,9 +154,33 @@ function Scene({ activeIndex }: { activeIndex: number }) {
   );
 }
 
-export default function Galaxy({ activeIndex = 0 }: { activeIndex?: number }) {
+export default function Galaxy({
+  activeIndex = 0,
+  selectedId = null,
+  onSelect,
+  onHoverChange,
+}: {
+  activeIndex?: number;
+  selectedId?: string | null;
+  onSelect?: (id: string) => void;
+  onHoverChange?: (id: string | null) => void;
+}) {
+  const [hoveredId, setHoveredId] = useState<string | null>(null);
+
+  const handleHover = (id: string | null) => {
+    setHoveredId(id);
+    onHoverChange?.(id);
+  };
+
   return (
-    <div style={{ position: "fixed", inset: 0, background: "#070b18" }}>
+    <div
+      style={{
+        position: "fixed",
+        inset: 0,
+        background: "#070b18",
+        cursor: hoveredId ? "pointer" : "default",
+      }}
+    >
       <Canvas
         style={{ width: "100%", height: "100%", display: "block" }}
         camera={{ position: [0, 6, 38], fov: 55, near: 0.1, far: 4000 }}
@@ -103,7 +188,13 @@ export default function Galaxy({ activeIndex = 0 }: { activeIndex?: number }) {
         dpr={[1, 2]}
       >
         <color attach="background" args={["#070b18"]} />
-        <Scene activeIndex={activeIndex} />
+        <Scene
+          activeIndex={activeIndex}
+          hoveredId={hoveredId}
+          selectedId={selectedId}
+          onHover={handleHover}
+          onSelect={(id) => onSelect?.(id)}
+        />
       </Canvas>
     </div>
   );

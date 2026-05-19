@@ -44,9 +44,10 @@ function Index() {
 
 function GalaxyExperience() {
   const [activeIndex, setActiveIndex] = useState(0);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [hoveredId, setHoveredId] = useState<string | null>(null);
   const sectionRefs = useRef<Array<HTMLElement | null>>([]);
 
-  // IntersectionObserver: pick the section whose center is closest to viewport center.
   useEffect(() => {
     const onScroll = () => {
       const mid = window.innerHeight / 2;
@@ -77,16 +78,39 @@ function GalaxyExperience() {
     sectionRefs.current[i]?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
+  // Clicking a constellation in 3D selects it + navigates to its stop.
+  const handleSelect = (id: string) => {
+    const idx = BRAND_STOPS.findIndex((s) => s.id === id);
+    setSelectedId(id);
+    if (idx >= 0) scrollTo(idx);
+  };
+
+  const selectedStop = selectedId
+    ? BRAND_STOPS.find((s) => s.id === selectedId) ?? null
+    : null;
+  const hoveredStop = hoveredId
+    ? BRAND_STOPS.find((s) => s.id === hoveredId) ?? null
+    : null;
+
   return (
     <>
-      <Galaxy activeIndex={activeIndex} />
+      <Galaxy
+        activeIndex={activeIndex}
+        selectedId={selectedId}
+        onSelect={handleSelect}
+        onHoverChange={setHoveredId}
+      />
 
       {/* Top nav — click stops */}
       <nav className="fixed top-0 left-0 right-0 z-20 flex flex-wrap items-center justify-center gap-1 px-4 py-4 text-[#e6ecf7]">
         {BRAND_STOPS.map((s, i) => (
           <button
             key={s.id}
-            onClick={() => scrollTo(i)}
+            onClick={() => {
+              scrollTo(i);
+              if (s.id !== "intro") setSelectedId(s.id);
+              else setSelectedId(null);
+            }}
             className={
               "px-3 py-1.5 text-xs tracking-[0.18em] uppercase rounded-full transition " +
               (activeIndex === i
@@ -98,6 +122,53 @@ function GalaxyExperience() {
           </button>
         ))}
       </nav>
+
+      {/* Hover tooltip — small label that follows hover state */}
+      {hoveredStop && hoveredStop.id !== selectedId && (
+        <div className="fixed top-20 left-1/2 -translate-x-1/2 z-20 pointer-events-none">
+          <div className="px-3 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/10 text-[#e6ecf7] text-xs tracking-[0.2em] uppercase">
+            {hoveredStop.label}
+          </div>
+        </div>
+      )}
+
+      {/* Details panel — appears when a constellation is selected */}
+      <aside
+        className={
+          "fixed right-6 top-1/2 -translate-y-1/2 z-30 w-[min(360px,calc(100vw-3rem))] " +
+          "rounded-2xl border border-white/10 bg-[#0b1124]/80 backdrop-blur-xl p-6 " +
+          "text-[#e6ecf7] shadow-2xl transition-all duration-500 " +
+          (selectedStop
+            ? "opacity-100 translate-x-0"
+            : "opacity-0 translate-x-8 pointer-events-none")
+        }
+        aria-hidden={!selectedStop}
+      >
+        {selectedStop && (
+          <>
+            <div className="flex items-start justify-between gap-4 mb-4">
+              <div>
+                <p className="text-[10px] tracking-[0.3em] uppercase text-white/40 mb-2">
+                  {selectedStop.tagline ?? "Division"}
+                </p>
+                <h3 className="text-2xl font-light leading-tight">
+                  {selectedStop.label}
+                </h3>
+              </div>
+              <button
+                onClick={() => setSelectedId(null)}
+                className="text-white/40 hover:text-white/90 text-lg leading-none"
+                aria-label="Close details"
+              >
+                ×
+              </button>
+            </div>
+            <p className="text-sm leading-relaxed text-white/70">
+              {selectedStop.blurb}
+            </p>
+          </>
+        )}
+      </aside>
 
       {/* Scroll-driven sections — one full viewport per stop */}
       <div className="relative z-10">
@@ -123,3 +194,4 @@ function GalaxyExperience() {
     </>
   );
 }
+
