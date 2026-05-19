@@ -1,6 +1,6 @@
 import { Suspense, useMemo, useEffect, useRef } from "react";
 import { Canvas, useThree } from "@react-three/fiber";
-import { Environment, OrbitControls, useGLTF, Stars, Bounds, useBounds } from "@react-three/drei";
+import { Environment, OrbitControls, useGLTF, Stars } from "@react-three/drei";
 import * as THREE from "three";
 import { DRACOLoader } from "three-stdlib";
 
@@ -38,46 +38,53 @@ function GltfNode({ url, position, scale = 1 }: { url: string; position: [number
   return <primitive object={cloned} position={position} scale={scale} />;
 }
 
-/** Refits camera to enclose all children whenever they mount/change. */
-function AutoFit({ children }: { children: React.ReactNode }) {
-  return (
-    <Bounds fit clip observe margin={1.2}>
-      <FitOnLoad>{children}</FitOnLoad>
-    </Bounds>
-  );
-}
-
-function FitOnLoad({ children }: { children: React.ReactNode }) {
-  const bounds = useBounds();
+/** Walks the wrapped group after geometry resolves and positions the camera
+ *  so the whole bounding box fills the viewport with a small margin. */
+function AutoFit({ children, margin = 1.25 }: { children: React.ReactNode; margin?: number }) {
   const groupRef = useRef<THREE.Group>(null);
-  const { camera } = useThree();
+  const { camera, controls, size } = useThree();
+  const fitted = useRef(false);
 
-  // After children suspend-resolve, walk the group and call refresh/fit once
-  // we actually have geometry to measure.
   useEffect(() => {
     let raf = 0;
     let tries = 0;
     const attempt = () => {
       tries += 1;
       const group = groupRef.current;
-      if (!group) return;
+      if (!group || fitted.current) return;
       const box = new THREE.Box3().setFromObject(group);
-      const size = new THREE.Vector3();
-      box.getSize(size);
-      const meaningful = size.length() > 1; // avoid empty/zero box on first frames
-      if (meaningful) {
-        // Push camera's far plane out so the largest dimension fits comfortably.
+      const bsize = new THREE.Vector3();
+      const center = new THREE.Vector3();
+      box.getSize(bsize);
+      box.getCenter(center);
+      if (bsize.length() > 1) {
         const persp = camera as THREE.PerspectiveCamera;
-        persp.far = Math.max(persp.far, size.length() * 4);
+        const aspect = size.width / Math.max(1, size.height);
+        const fov = (persp.fov * Math.PI) / 180;
+        const fitHeightDist = (bsize.y / 2) / Math.tan(fov / 2);
+        const fitWidthDist = (bsize.x / 2) / Math.tan(fov / 2) / aspect;
+        const dist = Math.max(fitHeightDist, fitWidthDist, bsize.z) * margin;
+
+        // Look from +Z toward the center.
+        persp.position.set(center.x, center.y, center.z + dist);
+        persp.near = Math.max(0.1, dist / 1000);
+        persp.far = dist * 10;
+        persp.lookAt(center);
         persp.updateProjectionMatrix();
-        bounds.refresh(group).clip().fit();
+
+        const c = controls as unknown as { target: THREE.Vector3; update: () => void } | null;
+        if (c?.target) {
+          c.target.copy(center);
+          c.update();
+        }
+        fitted.current = true;
         return;
       }
-      if (tries < 60) raf = requestAnimationFrame(attempt);
+      if (tries < 120) raf = requestAnimationFrame(attempt);
     };
     raf = requestAnimationFrame(attempt);
     return () => cancelAnimationFrame(raf);
-  }, [bounds, camera]);
+  }, [camera, controls, size, margin]);
 
   return <group ref={groupRef}>{children}</group>;
 }
