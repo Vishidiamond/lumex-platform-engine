@@ -114,11 +114,6 @@ function Scene() {
     </>
   );
 }
-        </AutoFit>
-      </Suspense>
-    </>
-  );
-}
 
 export default function Galaxy() {
   return (
